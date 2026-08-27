@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdfdfd;
+  --surface: #ffffff;
+  --surface-muted: #f1f2f5;
+  --foreground: #14161b;
+  --muted-foreground: #5b6069;
+  --border: #e6e8ec;
+
+  --accent: #c23d17;
+  --accent-contrast: #ffffff;
+  --accent-soft: #fbe9e2;
+
+  --secondary: #202b5e;
+  --secondary-dark: #11172f;
+  --secondary-contrast: #ffffff;
+  --secondary-soft: #eaecf8;
+
+  --gold: #d79a2c;
+  --gold-soft: #faf0dc;
+
+  --radius-card: 20px;
+  --radius-input: 12px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-contrast: var(--secondary-contrast);
+  --color-secondary-soft: var(--secondary-soft);
+
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+
+  --font-display: var(--font-sora);
+  --font-sans: var(--font-jakarta);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  position: relative;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Site-wide aurora wash: soft, fixed color pools behind every page so the
+   background never reads as flat white, even where a section has no card
+   or gradient of its own. Plain rgba (not color-mix) so it renders the same
+   on older mobile browsers/webviews. Kept soft to stay a light, readable
+   theme even though the pools themselves are fairly saturated. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 8% 6%, rgba(194, 61, 23, 0.22) 0%, transparent 40%),
+    radial-gradient(circle at 94% 2%, rgba(215, 154, 44, 0.26) 0%, transparent 36%),
+    radial-gradient(circle at 90% 55%, rgba(32, 43, 94, 0.16) 0%, transparent 44%),
+    radial-gradient(circle at 4% 62%, rgba(194, 61, 23, 0.14) 0%, transparent 40%),
+    radial-gradient(circle at 45% 98%, rgba(215, 154, 44, 0.16) 0%, transparent 42%),
+    radial-gradient(circle at 60% 30%, rgba(32, 43, 94, 0.08) 0%, transparent 50%);
+}
+
+/* Faint dot grid on top of the aurora for a bit of tactile texture. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(20, 22, 27, 0.16) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.4;
+  -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, black 35%, transparent 90%);
+  mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, black 35%, transparent 90%);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+@keyframes pulse-star {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-14px) translateX(6px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
