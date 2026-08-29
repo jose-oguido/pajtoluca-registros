@@ -60,7 +60,7 @@ function SendRow({ decanato }: { decanato: DecanatoSendSummary }) {
 
 export function CoordinatorSendList({ decanatos }: { decanatos: DecanatoSendSummary[] }) {
   return (
-    <div className="rounded-[20px] border border-border bg-surface p-6">
+    <div className="rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:p-6">
       <h3 className="font-display text-lg font-bold uppercase tracking-tight">
         Enviar a coordinadores
       </h3>

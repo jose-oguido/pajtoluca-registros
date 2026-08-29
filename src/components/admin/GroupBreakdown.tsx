@@ -3,13 +3,13 @@ export function GroupBreakdown({ data }: { data: { group: string; count: number 
   const total = data.reduce((sum, d) => sum + d.count, 0);
 
   return (
-    <div className="rounded-[20px] border border-border bg-surface p-6">
+    <div className="rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:p-6">
       <h3 className="font-display text-lg font-bold uppercase tracking-tight">
         Registros por parroquia / grupo
       </h3>
       <p className="text-sm text-muted-foreground">{total} registros en total</p>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 max-h-32 space-y-4 overflow-y-auto pr-1">
         {data.length === 0 && (
           <p className="text-sm text-muted-foreground">Aún no hay registros.</p>
         )}

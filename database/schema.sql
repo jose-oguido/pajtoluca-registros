@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS registrations (
   zona_pastoral TEXT,
   emergency_contact_name TEXT,
   emergency_contact_phone TEXT,
+  discovery_reason TEXT,
   notes TEXT,
+  registration_type TEXT NOT NULL DEFAULT 'attendee',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -57,6 +59,45 @@ CREATE TABLE IF NOT EXISTS parishes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_parishes_decanato_id ON parishes(decanato_id);
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  admin_user_id INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_token_hash ON admin_sessions(token_hash);
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at ON admin_sessions(expires_at);
+
+CREATE TABLE IF NOT EXISTS staff_access_codes (
+  registration_type TEXT PRIMARY KEY,
+  code_hash TEXT NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS coordinator_report_batches (
+  decanato_id TEXT NOT NULL REFERENCES decanatos(id) ON DELETE CASCADE,
+  batch_number INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  sent_at TEXT,
+  PRIMARY KEY (decanato_id, batch_number)
+);
 
 -- ============================================================
 -- Datos iniciales: decanatos y parroquias

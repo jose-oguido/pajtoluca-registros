@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { CaretLeft, CaretRight, DownloadSimple, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
+import { CaretLeft, CaretRight, DownloadSimple } from "@phosphor-icons/react/dist/ssr";
+import { getTicketTypeLabel } from "@/lib/registration-types";
 import type { Registration } from "@/lib/registrations";
+import { RegistrationSearch } from "./RegistrationSearch";
 
 const DATE_FORMAT = new Intl.DateTimeFormat("es-MX", {
   day: "2-digit",
@@ -38,7 +40,7 @@ export function RegistrationsTable({
   }
 
   return (
-    <div className="rounded-[20px] border border-border bg-surface p-6">
+    <div className="rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-display text-lg font-bold uppercase tracking-tight">Registrados</h3>
@@ -46,20 +48,7 @@ export function RegistrationsTable({
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <form className="relative" action="/admin/dashboard">
-            <MagnifyingGlass
-              size={16}
-              weight="regular"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              type="text"
-              name="q"
-              defaultValue={search}
-              placeholder="Buscar por nombre, teléfono o grupo"
-              className="w-full rounded-[12px] border border-border bg-surface py-2.5 pl-9 pr-3 text-base focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent sm:w-72 sm:text-sm"
-            />
-          </form>
+          <RegistrationSearch key={search} search={search} />
           <a
             href="/api/admin/export"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold uppercase tracking-wide hover:bg-surface-muted"
@@ -70,11 +59,12 @@ export function RegistrationsTable({
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
-        <table className="w-full min-w-[840px] text-left text-sm">
-          <thead>
+      <div className="mt-6 hidden max-h-[264px] overflow-auto sm:block">
+        <table className="w-full min-w-[940px] text-left text-sm">
+          <thead className="sticky top-0 z-10 bg-surface">
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
               <th className="py-2.5 pr-4 font-medium">Folio</th>
+              <th className="py-2.5 pr-4 font-medium">Tipo</th>
               <th className="py-2.5 pr-4 font-medium">Nombre</th>
               <th className="py-2.5 pr-4 font-medium">Edad</th>
               <th className="py-2.5 pr-4 font-medium">Grupo</th>
@@ -87,7 +77,12 @@ export function RegistrationsTable({
           <tbody className="divide-y divide-border">
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="py-3 pr-4 tabular-nums text-muted-foreground">#{row.id}</td>
+                <td className="py-3 pr-4 font-mono text-xs font-semibold tabular-nums text-secondary">{row.ticket_id}</td>
+                <td className="py-3 pr-4">
+                  <span className="inline-flex items-center rounded-full bg-secondary-soft px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-secondary">
+                    {getTicketTypeLabel(row.registration_type, row.age)}
+                  </span>
+                </td>
                 <td className="py-3 pr-4 font-medium">{row.full_name}</td>
                 <td className="py-3 pr-4 tabular-nums">{row.age}</td>
                 <td className="py-3 pr-4">{row.parish_group ?? "Sin grupo"}</td>
@@ -101,13 +96,48 @@ export function RegistrationsTable({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="py-8 text-center text-muted-foreground">
                   No se encontraron registros.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-5 space-y-3 sm:hidden">
+        {rows.map((row) => (
+          <article key={row.id} className="rounded-[14px] bg-surface-muted p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold tabular-nums text-secondary">{row.ticket_id}</p>
+                <h4 className="mt-1 truncate font-display text-base font-bold tracking-tight">{row.full_name}</h4>
+              </div>
+              <span className="shrink-0 rounded-full bg-secondary-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-secondary">
+                {getTicketTypeLabel(row.registration_type, row.age)}
+              </span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
+              <div>
+                <dt className="font-semibold uppercase tracking-wide text-muted-foreground">Edad</dt>
+                <dd className="mt-0.5 font-medium tabular-nums">{row.age} años</dd>
+              </div>
+              <div>
+                <dt className="font-semibold uppercase tracking-wide text-muted-foreground">Registro</dt>
+                <dd className="mt-0.5 text-muted-foreground">{DATE_FORMAT.format(new Date(row.created_at.replace(" ", "T") + "Z"))}</dd>
+              </div>
+              <div className="col-span-2 min-w-0">
+                <dt className="font-semibold uppercase tracking-wide text-muted-foreground">Contacto</dt>
+                <dd className="mt-0.5 truncate">{formatPhone(row.phone)} · {row.email || "—"}</dd>
+              </div>
+              <div className="col-span-2 min-w-0">
+                <dt className="font-semibold uppercase tracking-wide text-muted-foreground">Grupo</dt>
+                <dd className="mt-0.5 truncate text-muted-foreground">{row.parish_group ?? "Sin grupo"}{row.decanato ? ` · ${row.decanato}` : ""}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+        {rows.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">No se encontraron registros.</p>}
       </div>
 
       {totalPages > 1 && (

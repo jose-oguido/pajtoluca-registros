@@ -3,42 +3,46 @@
 import { redirect } from "next/navigation";
 import { createRegistration } from "@/lib/registrations";
 import { findParishById } from "@/lib/directory";
+import { resolveStaffRegistrationType } from "@/lib/staff-access";
 import { sendAutomaticDecanatoReportIfDue } from "@/lib/mailer";
-import type { RegistrationState } from "./state";
+import type { StaffRegistrationState } from "./state";
 
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-export async function submitRegistration(
-  _prevState: RegistrationState,
+export async function submitStaffRegistration(
+  _prevState: StaffRegistrationState,
   formData: FormData
-): Promise<RegistrationState> {
+): Promise<StaffRegistrationState> {
+  const rawAccessCode = String(formData.get("access_code") ?? "").trim();
   const rawFullName = String(formData.get("full_name") ?? "").trim();
   const rawAge = String(formData.get("age") ?? "").trim();
   const rawPhone = String(formData.get("phone") ?? "").trim();
   const rawEmail = String(formData.get("email") ?? "").trim();
-  const rawBelongsToGroup = String(formData.get("belongs_to_group") ?? "").trim();
   const rawParishId = String(formData.get("parish_id") ?? "").trim();
   const rawEmergencyName = String(formData.get("emergency_contact_name") ?? "").trim();
   const rawEmergencyPhone = String(formData.get("emergency_contact_phone") ?? "").trim();
-  const rawDiscoveryReason = String(formData.get("discovery_reason") ?? "").trim();
   const rawNotes = String(formData.get("notes") ?? "").trim();
 
   const values: Record<string, string> = {
+    access_code: rawAccessCode,
     full_name: rawFullName,
     age: rawAge,
     phone: rawPhone,
     email: rawEmail,
-    belongs_to_group: rawBelongsToGroup,
     parish_id: rawParishId,
     emergency_contact_name: rawEmergencyName,
     emergency_contact_phone: rawEmergencyPhone,
-    discovery_reason: rawDiscoveryReason,
     notes: rawNotes,
   };
 
   const errors: Record<string, string> = {};
+
+  const registrationType = resolveStaffRegistrationType(rawAccessCode);
+  if (!registrationType) {
+    errors.access_code = "Código de acceso inválido.";
+  }
 
   if (rawFullName.length < 3) {
     errors.full_name = "Escribe tu nombre completo.";
@@ -58,16 +62,9 @@ export async function submitRegistration(
     errors.email = "Ingresa un correo electrónico válido.";
   }
 
-  if (rawBelongsToGroup !== "yes" && rawBelongsToGroup !== "no") {
-    errors.belongs_to_group = "Indica si perteneces a un grupo o parroquia.";
-  }
-
-  let parish = null;
-  if (rawBelongsToGroup === "yes") {
-    parish = rawParishId ? findParishById(rawParishId) : undefined;
-    if (!parish) {
-      errors.parish_id = "Selecciona tu parroquia o grupo de la lista.";
-    }
+  const parish = rawParishId ? findParishById(rawParishId) : undefined;
+  if (!parish) {
+    errors.parish_id = "Selecciona tu parroquia de la lista.";
   }
 
   if (rawEmergencyName.length < 3) {
@@ -82,27 +79,23 @@ export async function submitRegistration(
     return { status: "error", errors, values };
   }
 
-  const belongsToGroup = rawBelongsToGroup === "yes";
   const { ticketId } = createRegistration({
     full_name: rawFullName,
     age,
     phone: phoneDigits,
     email: rawEmail,
-    belongs_to_group: belongsToGroup,
-    parish_id: parish?.id ?? null,
-    parish_group: parish ? `${parish.name} (${parish.locality})` : null,
-    decanato: parish?.decanato ?? null,
-    zona_pastoral: parish?.zonaPastoral ?? null,
+    belongs_to_group: true,
+    parish_id: parish!.id,
+    parish_group: `${parish!.name} (${parish!.locality})`,
+    decanato: parish!.decanato,
+    zona_pastoral: parish!.zonaPastoral,
     emergency_contact_name: rawEmergencyName,
     emergency_contact_phone: digitsOnly(rawEmergencyPhone),
-    discovery_reason: belongsToGroup ? null : rawDiscoveryReason || null,
     notes: rawNotes || null,
-    registration_type: "attendee",
+    registration_type: registrationType!,
   });
 
-  await sendAutomaticDecanatoReportIfDue(parish?.decanato);
+  await sendAutomaticDecanatoReportIfDue(parish!.decanato);
 
-  // Take the attendee straight to their ticket instead of an inline
-  // confirmation screen they'd have to click through.
   redirect(`/boleto/${ticketId}`);
 }

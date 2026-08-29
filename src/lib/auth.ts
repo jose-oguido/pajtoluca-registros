@@ -1,73 +1,143 @@
-// Sesión de administrador firmada con HMAC (Web Crypto), compatible con
-// Edge Middleware y con el runtime de Node usado por los server actions.
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import db from "./db";
+
 export const SESSION_COOKIE_NAME = "jaj_admin_session";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8; // 8 horas
+export const SESSION_COOKIE_MAX_AGE = 60 * 60 * 8;
 
-function getSecret(): string {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) {
-    throw new Error("Falta SESSION_SECRET en las variables de entorno.");
+export type AdminUser = {
+  id: number;
+  username: string;
+};
+
+type AdminUserRow = AdminUser & {
+  password_hash: string;
+};
+
+function hashValue(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const key = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${key}`;
+}
+
+function passwordMatches(password: string, stored: string): boolean {
+  const [salt, expectedKey] = stored.split(":");
+  if (!salt || !expectedKey) return false;
+
+  const actualKey = scryptSync(password, salt, 64).toString("hex");
+  const expected = Buffer.from(expectedKey, "hex");
+  const actual = Buffer.from(actualKey, "hex");
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
+
+function getAdminByUsername(username: string): AdminUserRow | undefined {
+  return db
+    .prepare(`SELECT id, username, password_hash FROM admin_users WHERE username = ?`)
+    .get(username) as AdminUserRow | undefined;
+}
+
+export function hasAdminUser(): boolean {
+  const row = db.prepare(`SELECT COUNT(*) as count FROM admin_users`).get() as { count: number };
+  return row.count > 0;
+}
+
+export function createFirstAdmin(username: string, password: string): AdminUser {
+  const create = db.transaction(() => {
+    if (hasAdminUser()) {
+      throw new Error("La cuenta de administrador ya fue configurada.");
+    }
+
+    const result = db
+      .prepare(`INSERT INTO admin_users (username, password_hash) VALUES (?, ?)`)
+      .run(username, hashPassword(password));
+    return { id: Number(result.lastInsertRowid), username };
+  });
+
+  return create();
+}
+
+export function authenticateAdmin(username: string, password: string): AdminUser | null {
+  const user = getAdminByUsername(username);
+  if (!user || !passwordMatches(password, user.password_hash)) return null;
+  return { id: user.id, username: user.username };
+}
+
+export function updateAdminAccount(
+  adminId: number,
+  data: { username: string; currentPassword: string; newPassword?: string }
+): { ok: true; username: string } | { ok: false; error: string } {
+  const user = db
+    .prepare(`SELECT id, username, password_hash FROM admin_users WHERE id = ?`)
+    .get(adminId) as AdminUserRow | undefined;
+
+  if (!user || !passwordMatches(data.currentPassword, user.password_hash)) {
+    return { ok: false, error: "La contraseña actual no es correcta." };
   }
-  return secret;
-}
-
-async function importKey(secret: string): Promise<CryptoKey> {
-  return crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"]
-  );
-}
-
-function bufToHex(buf: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-export async function createSessionToken(): Promise<string> {
-  const secret = getSecret();
-  const exp = Date.now() + SESSION_MAX_AGE_SECONDS * 1000;
-  const payload = `${exp}`;
-  const key = await importKey(secret);
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
-  return `${payload}.${bufToHex(signature)}`;
-}
-
-export async function verifySessionToken(token: string | undefined | null): Promise<boolean> {
-  if (!token) return false;
-  const [payload, signatureHex] = token.split(".");
-  if (!payload || !signatureHex) return false;
-
-  const exp = Number(payload);
-  if (!Number.isFinite(exp) || Date.now() > exp) return false;
 
   try {
-    const secret = getSecret();
-    const key = await importKey(secret);
-    const expectedSignature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
-    const expectedHex = bufToHex(expectedSignature);
-    if (expectedHex.length !== signatureHex.length) return false;
-
-    let diff = 0;
-    for (let i = 0; i < expectedHex.length; i++) {
-      diff |= expectedHex.charCodeAt(i) ^ signatureHex.charCodeAt(i);
+    if (data.newPassword) {
+      db.prepare(`UPDATE admin_users SET username = ?, password_hash = ? WHERE id = ?`).run(
+        data.username,
+        hashPassword(data.newPassword),
+        adminId
+      );
+    } else {
+      db.prepare(`UPDATE admin_users SET username = ? WHERE id = ?`).run(data.username, adminId);
     }
-    return diff === 0;
-  } catch {
-    return false;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("UNIQUE constraint failed")) {
+      return { ok: false, error: "Ese usuario ya está en uso." };
+    }
+    throw error;
   }
+
+  return { ok: true, username: data.username };
 }
 
-export function verifyCredentials(username: string, password: string): boolean {
-  const expectedUser = process.env.ADMIN_USERNAME;
-  const expectedPass = process.env.ADMIN_PASSWORD;
-  if (!expectedUser || !expectedPass) {
-    throw new Error("Faltan ADMIN_USERNAME o ADMIN_PASSWORD en las variables de entorno.");
-  }
-  return username === expectedUser && password === expectedPass;
+export function createSession(adminUserId: number): string {
+  db.prepare(`DELETE FROM admin_sessions WHERE julianday(expires_at) <= julianday('now')`).run();
+
+  const token = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + SESSION_COOKIE_MAX_AGE * 1000).toISOString();
+  db.prepare(
+    `INSERT INTO admin_sessions (admin_user_id, token_hash, expires_at) VALUES (?, ?, ?)`
+  ).run(adminUserId, hashValue(token), expiresAt);
+  return token;
 }
 
-export const SESSION_COOKIE_MAX_AGE = SESSION_MAX_AGE_SECONDS;
+export function deleteSession(token: string | undefined): void {
+  if (!token) return;
+  db.prepare(`DELETE FROM admin_sessions WHERE token_hash = ?`).run(hashValue(token));
+}
+
+export async function getCurrentAdmin(): Promise<AdminUser | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  if (!token) return null;
+
+  db.prepare(`DELETE FROM admin_sessions WHERE julianday(expires_at) <= julianday('now')`).run();
+  const user = db
+    .prepare(
+      `
+      SELECT admin_users.id, admin_users.username
+      FROM admin_sessions
+      JOIN admin_users ON admin_users.id = admin_sessions.admin_user_id
+      WHERE admin_sessions.token_hash = ?
+        AND julianday(admin_sessions.expires_at) > julianday('now')
+      `
+    )
+    .get(hashValue(token)) as AdminUser | undefined;
+
+  return user ?? null;
+}
+
+export async function requireAdminSession(): Promise<AdminUser> {
+  const user = await getCurrentAdmin();
+  if (!user) redirect("/admin/login");
+  return user;
+}

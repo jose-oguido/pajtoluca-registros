@@ -47,6 +47,10 @@ export function getDecanatoById(id: string): Decanato | undefined {
   return db.prepare(`SELECT * FROM decanatos WHERE id = ?`).get(id) as Decanato | undefined;
 }
 
+export function getDecanatoByName(name: string): Decanato | undefined {
+  return db.prepare(`SELECT * FROM decanatos WHERE name = ?`).get(name) as Decanato | undefined;
+}
+
 export function getParishesByDecanato(decanatoId: string): Parish[] {
   return db
     .prepare(`SELECT * FROM parishes WHERE decanato_id = ? ORDER BY sort_order ASC, name ASC`)

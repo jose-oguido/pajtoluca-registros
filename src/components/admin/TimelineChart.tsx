@@ -4,7 +4,7 @@ export function TimelineChart({ data }: { data: { date: string; count: number }[
   const max = Math.max(1, ...data.map((d) => d.count));
 
   return (
-    <div className="rounded-[20px] border border-border bg-surface p-6">
+    <div className="rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:p-6">
       <h3 className="font-display text-lg font-bold uppercase tracking-tight">Registros por día</h3>
       <p className="text-sm text-muted-foreground">Últimos {data.length} días</p>
 

@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { WarningCircle, ArrowRight } from "@phosphor-icons/react";
 import { submitRegistration } from "@/app/registro/actions";
 import { initialRegistrationState } from "@/app/registro/state";
+import { formatPhone, validatePhone } from "@/lib/phone";
 import { ParishCombobox } from "./ParishCombobox";
 
 type ParishGroup = {
@@ -16,55 +17,47 @@ type ParishGroup = {
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-sm text-red-600">
-      <WarningCircle size={15} weight="fill" />
+    <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-600">
+      <WarningCircle size={13} weight="fill" />
       {message}
     </p>
   );
 }
 
-function formatPhone(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, 10);
-  const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 10)].filter(Boolean);
-  return parts.join(" ");
-}
-
 function validateAge(value: string): string | undefined {
   if (!value) return undefined;
   const age = Number(value);
-  if (!Number.isInteger(age) || age < 15 || age > 30) {
-    return "Este es un evento para jóvenes: ingresa una edad entre 15 y 30 años.";
+  if (!Number.isInteger(age) || age < 12 || age > 45) {
+    return "Ingresa una edad entre 12 y 45 años.";
   }
   return undefined;
 }
 
 function validateEmail(value: string): string | undefined {
-  if (!value) return undefined;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
     return "Ingresa un correo electrónico válido.";
   }
   return undefined;
 }
 
-function validatePhone(value: string): string | undefined {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length !== 10) {
-    return "Ingresa un número de celular a 10 dígitos.";
+function validateEmergencyName(value: string): string | undefined {
+  if (value.trim().length < 3) {
+    return "Escribe el nombre de tu contacto de emergencia.";
   }
   return undefined;
 }
 
 function validateEmergencyPhone(value: string): string | undefined {
   const digits = value.replace(/\D/g, "");
-  if (digits.length > 0 && digits.length !== 10) {
-    return "Ingresa un número a 10 dígitos, o deja el campo vacío.";
+  if (digits.length !== 10) {
+    return "Ingresa un número de contacto de emergencia a 10 dígitos.";
   }
   return undefined;
 }
 
 function inputClass(hasError: boolean) {
   return [
-    "w-full rounded-[12px] border bg-surface px-4 py-3 text-foreground",
+    "w-full rounded-[12px] border bg-surface px-3.5 py-2 text-foreground",
     "placeholder:text-muted-foreground/70",
     "focus:outline-none focus:ring-2 focus:ring-offset-0",
     hasError
@@ -79,7 +72,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-semibold uppercase tracking-wide text-accent-contrast transition-transform active:scale-[0.98] disabled:opacity-60 sm:w-auto"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-wide text-accent-contrast transition-transform active:scale-[0.98] disabled:opacity-60 sm:w-auto"
     >
       {pending ? "Enviando..." : "Confirmar registro"}
       {!pending && <ArrowRight size={18} weight="bold" />}
@@ -96,6 +89,8 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
     formatPhone(state.values.emergency_contact_phone ?? "")
   );
   const [emergencyPhoneTouched, setEmergencyPhoneTouched] = useState(false);
+  const [emergencyName, setEmergencyName] = useState(state.values.emergency_contact_name ?? "");
+  const [emergencyNameTouched, setEmergencyNameTouched] = useState(false);
   const [age, setAge] = useState(state.values.age ?? "");
   const [ageTouched, setAgeTouched] = useState(false);
   const [email, setEmail] = useState(state.values.email ?? "");
@@ -107,14 +102,17 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
   const emergencyPhoneError = emergencyPhoneTouched
     ? validateEmergencyPhone(emergencyPhone)
     : state.errors.emergency_contact_phone;
+  const emergencyNameError = emergencyNameTouched
+    ? validateEmergencyName(emergencyName)
+    : state.errors.emergency_contact_name;
 
   return (
-    <form action={formAction} className="space-y-10" noValidate>
-      <fieldset className="space-y-5">
-        <legend className="font-display text-lg font-bold uppercase">Tus datos</legend>
+    <form action={formAction} className="space-y-4" noValidate>
+      <fieldset className="space-y-2.5">
+        <legend className="font-display text-base font-bold uppercase">Tus datos</legend>
 
         <div>
-          <label htmlFor="full_name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <label htmlFor="full_name" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Nombre completo
           </label>
           <input
@@ -128,9 +126,9 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
           <FieldError message={state.errors.full_name} />
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label htmlFor="age" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <label htmlFor="age" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Edad
             </label>
             <input
@@ -138,8 +136,8 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
               name="age"
               type="number"
               inputMode="numeric"
-              min={15}
-              max={30}
+              min={12}
+              max={45}
               value={age}
               onChange={(e) => {
                 setAge(e.target.value);
@@ -151,7 +149,7 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
           </div>
 
           <div>
-            <label htmlFor="phone" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <label htmlFor="phone" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Teléfono celular
             </label>
             <input
@@ -173,8 +171,8 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Correo electrónico <span className="font-normal text-muted-foreground">(opcional)</span>
+          <label htmlFor="email" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Correo electrónico
           </label>
           <input
             id="email"
@@ -192,11 +190,11 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
         </div>
       </fieldset>
 
-      <fieldset className="space-y-5">
-        <legend className="font-display text-lg font-bold uppercase">Tu grupo</legend>
+      <fieldset className="space-y-2.5">
+        <legend className="font-display text-base font-bold uppercase">Tu grupo</legend>
 
         <div>
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             ¿Perteneces a un grupo o parroquia?
           </span>
           <div className="grid grid-cols-2 gap-3">
@@ -207,7 +205,7 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
               <label
                 key={option.value}
                 className={[
-                  "flex cursor-pointer items-center justify-center rounded-[12px] border px-4 py-3 text-sm font-semibold uppercase tracking-wide transition-colors",
+                  "flex cursor-pointer items-center justify-center rounded-[12px] border px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors",
                   belongsToGroup === option.value
                     ? "border-accent bg-accent-soft text-accent"
                     : "border-border text-foreground hover:bg-surface-muted",
@@ -230,7 +228,7 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
 
         {belongsToGroup === "yes" && (
           <div>
-            <label htmlFor="parish_id" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <label htmlFor="parish_id" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Parroquia o grupo juvenil
             </label>
             <ParishCombobox
@@ -245,26 +243,46 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
         )}
       </fieldset>
 
-      <fieldset className="space-y-5">
-        <legend className="font-display text-lg font-bold uppercase">
-          Contacto de emergencia <span className="font-normal text-muted-foreground">(opcional)</span>
+      {belongsToGroup === "no" && (
+        <div>
+          <label htmlFor="discovery_reason" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            ¿En dónde te enteraste de la JAJ y por qué decidiste acudir?
+          </label>
+          <textarea
+            id="discovery_reason"
+            name="discovery_reason"
+            rows={1}
+            defaultValue={state.values.discovery_reason}
+            className={`${inputClass(false)} h-10 resize-none`}
+          />
+        </div>
+      )}
+
+      <fieldset className="space-y-2.5">
+        <legend className="font-display text-base font-bold uppercase">
+          Contacto de emergencia
         </legend>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label htmlFor="emergency_contact_name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <label htmlFor="emergency_contact_name" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Nombre
             </label>
             <input
               id="emergency_contact_name"
               name="emergency_contact_name"
               type="text"
-              defaultValue={state.values.emergency_contact_name}
-              className={inputClass(false)}
+              value={emergencyName}
+              onChange={(e) => {
+                setEmergencyName(e.target.value);
+                setEmergencyNameTouched(true);
+              }}
+              className={inputClass(!!emergencyNameError)}
             />
+            <FieldError message={emergencyNameError} />
           </div>
           <div>
-            <label htmlFor="emergency_contact_phone" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <label htmlFor="emergency_contact_phone" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Teléfono
             </label>
             <input
@@ -285,18 +303,18 @@ export function RegistrationForm({ parishGroups }: { parishGroups: ParishGroup[]
         </div>
       </fieldset>
 
-      <fieldset className="space-y-5">
-        <legend className="font-display text-lg font-bold uppercase">
+      <fieldset className="space-y-2.5">
+        <legend className="font-display text-base font-bold uppercase">
           Notas <span className="font-normal text-muted-foreground">(opcional)</span>
         </legend>
         <div>
-          <label htmlFor="notes" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <label htmlFor="notes" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Alergias o indicaciones especiales
           </label>
           <textarea
             id="notes"
             name="notes"
-            rows={3}
+            rows={2}
             defaultValue={state.values.notes}
             className={inputClass(false)}
           />

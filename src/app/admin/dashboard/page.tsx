@@ -6,6 +6,8 @@ import {
   getDecanatoBreakdown,
   getDecanatoSendSummary,
   getGroupBreakdown,
+  getRegistrationTypeBreakdown,
+  getSacerdoteCount,
   getTimeline,
   getTodayCount,
   getTopGroup,
@@ -17,22 +19,27 @@ import { TimelineChart } from "@/components/admin/TimelineChart";
 import { GroupBreakdown } from "@/components/admin/GroupBreakdown";
 import { DecanatoBreakdown } from "@/components/admin/DecanatoBreakdown";
 import { AgeCategoryBreakdown } from "@/components/admin/AgeCategoryBreakdown";
+import { StaffBreakdown } from "@/components/admin/StaffBreakdown";
+import { AddSacerdoteForm } from "@/components/admin/AddSacerdoteForm";
 import { RegistrationsTable } from "@/components/admin/RegistrationsTable";
 import { CoordinatorSendList } from "@/components/admin/CoordinatorSendList";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { eventConfig } from "@/lib/event-config";
+import { requireAdminSession } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: `Panel de organizadores · ${eventConfig.name}`,
 };
 
 const PAGE_SIZE = 25;
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
+  await requireAdminSession();
   const params = await searchParams;
   const search = params.q ?? "";
   const page = Math.max(1, Number(params.page ?? "1") || 1);
@@ -45,6 +52,8 @@ export default async function AdminDashboardPage({
   const groupBreakdown = getGroupBreakdown();
   const decanatoBreakdown = getDecanatoBreakdown();
   const ageBreakdown = getAgeCategoryBreakdown();
+  const staffBreakdown = getRegistrationTypeBreakdown();
+  const sacerdoteCount = getSacerdoteCount();
   const coordinatorSummary = getDecanatoSendSummary();
   const { rows, total: searchTotal } = listRegistrations({
     search,
@@ -56,7 +65,7 @@ export default async function AdminDashboardPage({
 
   return (
     <main className="flex-1">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <AdminHeader />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -81,6 +90,11 @@ export default async function AdminDashboardPage({
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <GroupBreakdown data={groupBreakdown} />
           <DecanatoBreakdown data={decanatoBreakdown} />
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <StaffBreakdown data={staffBreakdown} />
+          <AddSacerdoteForm count={sacerdoteCount} />
         </div>
 
         <div className="mt-6">

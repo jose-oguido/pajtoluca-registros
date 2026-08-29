@@ -12,7 +12,7 @@ export function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-[20px] border border-border bg-surface p-5">
+    <div className="rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:p-5">
       <div className="flex items-center gap-2 text-muted-foreground">
         <IconComponent size={18} weight="regular" />
         <span className="text-sm font-semibold uppercase tracking-wide">{label}</span>

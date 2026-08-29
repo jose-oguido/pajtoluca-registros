@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
-import { RegistrationForm } from "@/components/registro/RegistrationForm";
+import { StaffRegistrationForm } from "@/components/registro/StaffRegistrationForm";
 import { eventConfig } from "@/lib/event-config";
 import { getParishesGroupedForForm } from "@/lib/directory";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `Regístrate · ${eventConfig.edition} ${eventConfig.name}`,
+  title: `Registro de staff · ${eventConfig.edition} ${eventConfig.name}`,
 };
 
-export default function RegistroPage() {
+export default function RegistroStaffPage() {
   const parishGroups = getParishesGroupedForForm();
 
   return (
@@ -27,14 +27,15 @@ export default function RegistroPage() {
         </Link>
 
         <h1 className="mt-3 font-display text-xl font-bold uppercase tracking-tight md:text-2xl">
-          Registro {eventConfig.edition} {eventConfig.name}
+          Registro de staff {eventConfig.edition} {eventConfig.name}
         </h1>
         <p className="mt-1 max-w-[55ch] text-sm text-muted-foreground">
-          Completa tus datos para apartar tu lugar. Toma menos de dos minutos.
+          Este registro es solo para staff y ministros extraordinarios. Necesitas el código de
+          acceso de tu equipo.
         </p>
 
         <div className="mt-6">
-          <RegistrationForm parishGroups={parishGroups} />
+          <StaffRegistrationForm parishGroups={parishGroups} />
         </div>
       </div>
     </main>

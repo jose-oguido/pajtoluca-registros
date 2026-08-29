@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { getCurrentAdmin } from "@/lib/auth";
 import { getAllRegistrationsForExport } from "@/lib/registrations";
+import { getTicketTypeLabel } from "@/lib/registration-types";
 
 function csvEscape(value: string): string {
   if (/[",\n]/.test(value)) {
@@ -9,16 +11,23 @@ function csvEscape(value: string): string {
 }
 
 export async function GET() {
+  const admin = await getCurrentAdmin();
+  if (!admin) {
+    return new NextResponse("No autorizado", { status: 401 });
+  }
+
   const rows = getAllRegistrationsForExport();
 
   const header = [
     "folio",
     "boleto_id",
+    "tipo_registro",
     "nombre_completo",
     "edad",
     "telefono",
     "correo",
     "pertenece_a_grupo",
+    "como_se_entero_y_motivo",
     "parroquia_grupo",
     "decanato",
     "zona_pastoral",
@@ -34,11 +43,13 @@ export async function GET() {
       [
         String(row.id),
         csvEscape(row.ticket_id),
+        csvEscape(getTicketTypeLabel(row.registration_type, row.age)),
         csvEscape(row.full_name),
         String(row.age),
         csvEscape(row.phone),
         csvEscape(row.email ?? ""),
         row.belongs_to_group ? "si" : "no",
+        csvEscape(row.discovery_reason ?? ""),
         csvEscape(row.parish_group ?? ""),
         csvEscape(row.decanato ?? ""),
         csvEscape(row.zona_pastoral ?? ""),

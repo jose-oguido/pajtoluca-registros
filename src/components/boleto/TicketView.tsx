@@ -8,9 +8,11 @@ import type { Registration } from "@/lib/registrations";
 export function TicketView({
   registration,
   qrDataUrl,
+  flyerSrc,
 }: {
   registration: Registration;
   qrDataUrl: string;
+  flyerSrc: string | null;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -38,14 +40,14 @@ export function TicketView({
   }
 
   return (
-    <div>
-      <TicketCard ref={cardRef} registration={registration} qrDataUrl={qrDataUrl} />
+    <div className="mx-auto w-full max-w-5xl">
+      <TicketCard ref={cardRef} registration={registration} qrDataUrl={qrDataUrl} flyerSrc={flyerSrc} />
 
       <button
         type="button"
         onClick={handleDownload}
         disabled={downloading}
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-7 py-3.5 text-base font-semibold uppercase tracking-wide text-accent-contrast transition-transform active:scale-[0.98] disabled:opacity-60 sm:w-auto"
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold uppercase tracking-wide text-accent-contrast shadow-lg shadow-accent/20 transition-transform active:scale-[0.98] disabled:opacity-60 sm:mt-6 sm:w-auto sm:px-7 sm:py-3.5 sm:text-base"
       >
         <DownloadSimple size={18} weight="bold" />
         {downloading ? "Generando..." : "Descargar boleto"}

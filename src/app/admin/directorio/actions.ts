@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/auth";
 import {
   createDecanato,
   createParish,
@@ -16,6 +17,7 @@ function refresh() {
 }
 
 export async function createDecanatoAction(formData: FormData): Promise<void> {
+  await requireAdminSession();
   const name = String(formData.get("name") ?? "").trim();
   const zonaPastoral = String(formData.get("zonaPastoral") ?? "").trim();
   if (!name || !zonaPastoral) return;
@@ -25,6 +27,7 @@ export async function createDecanatoAction(formData: FormData): Promise<void> {
 }
 
 export async function updateDecanatoAction(decanatoId: string, formData: FormData): Promise<void> {
+  await requireAdminSession();
   const name = String(formData.get("name") ?? "").trim();
   const zonaPastoral = String(formData.get("zonaPastoral") ?? "").trim();
   const coordinatorName = String(formData.get("coordinatorName") ?? "").trim();
@@ -43,11 +46,13 @@ export async function updateDecanatoAction(decanatoId: string, formData: FormDat
 }
 
 export async function deleteDecanatoAction(decanatoId: string): Promise<void> {
+  await requireAdminSession();
   deleteDecanato(decanatoId);
   refresh();
 }
 
 export async function createParishAction(decanatoId: string, formData: FormData): Promise<void> {
+  await requireAdminSession();
   const name = String(formData.get("name") ?? "").trim();
   const locality = String(formData.get("locality") ?? "").trim();
   if (!name || !locality) return;
@@ -61,6 +66,7 @@ export async function updateParishAction(
   decanatoId: string,
   formData: FormData
 ): Promise<void> {
+  await requireAdminSession();
   const name = String(formData.get("name") ?? "").trim();
   const locality = String(formData.get("locality") ?? "").trim();
   if (!name || !locality) return;
@@ -70,6 +76,7 @@ export async function updateParishAction(
 }
 
 export async function deleteParishAction(parishId: string): Promise<void> {
+  await requireAdminSession();
   deleteParish(parishId);
   refresh();
 }

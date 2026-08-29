@@ -3,6 +3,7 @@ import { CaretDown, Plus, Trash } from "@phosphor-icons/react/dist/ssr";
 import { getDirectory } from "@/lib/directory";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { eventConfig } from "@/lib/event-config";
+import { requireAdminSession } from "@/lib/auth";
 import {
   createDecanatoAction,
   createParishAction,
@@ -24,11 +25,12 @@ const fieldClass =
 const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground";
 
 export default async function DirectorioPage() {
+  await requireAdminSession();
   const directory = getDirectory();
 
   return (
     <main className="flex-1">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <AdminHeader />
 
         <p className="max-w-[65ch] text-sm text-muted-foreground">
@@ -36,7 +38,7 @@ export default async function DirectorioPage() {
           formulario de registro. Los cambios se reflejan de inmediato en el sitio público.
         </p>
 
-        <div className="mt-8 rounded-[20px] border border-border bg-surface p-6">
+        <div className="mt-6 rounded-[20px] border border-border bg-surface p-4 shadow-lg shadow-secondary/5 sm:mt-8 sm:p-6">
           <h2 className="font-display text-lg font-bold uppercase tracking-tight">
             Agregar decanato
           </h2>
@@ -68,7 +70,7 @@ export default async function DirectorioPage() {
         <div className="mt-6 space-y-4">
           {directory.map(({ decanato, parishes }) => (
             <details key={decanato.id} className="group rounded-[20px] border border-border bg-surface">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-4 sm:p-6 [&::-webkit-details-marker]:hidden">
                 <div>
                   <p className="font-display text-base font-bold uppercase tracking-tight">
                     {decanato.name}
@@ -85,7 +87,7 @@ export default async function DirectorioPage() {
                 />
               </summary>
 
-              <div className="space-y-8 border-t border-border p-6">
+              <div className="space-y-8 border-t border-border p-4 sm:p-6">
                 <form className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelClass} htmlFor={`name-${decanato.id}`}>

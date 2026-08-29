@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfdfd;
+  --background: #fffaf5;
   --surface: #ffffff;
-  --surface-muted: #f1f2f5;
-  --foreground: #14161b;
-  --muted-foreground: #5b6069;
-  --border: #e6e8ec;
+  --surface-muted: #f4f3ff;
+  --foreground: #171622;
+  --muted-foreground: #5f6171;
+  --border: #e5e1ef;
 
-  --accent: #c23d17;
+  --accent: #e54213;
   --accent-contrast: #ffffff;
-  --accent-soft: #fbe9e2;
+  --accent-soft: #ffe4db;
 
-  --secondary: #202b5e;
-  --secondary-dark: #11172f;
+  --secondary: #2643bb;
+  --secondary-dark: #14246d;
   --secondary-contrast: #ffffff;
-  --secondary-soft: #eaecf8;
+  --secondary-soft: #e5e9ff;
 
-  --gold: #d79a2c;
-  --gold-soft: #faf0dc;
+  --gold: #f4a900;
+  --gold-soft: #fff0c6;
 
   --radius-card: 20px;
   --radius-input: 12px;
@@ -69,31 +69,33 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    radial-gradient(circle at 8% 6%, rgba(194, 61, 23, 0.22) 0%, transparent 40%),
-    radial-gradient(circle at 94% 2%, rgba(215, 154, 44, 0.26) 0%, transparent 36%),
-    radial-gradient(circle at 90% 55%, rgba(32, 43, 94, 0.16) 0%, transparent 44%),
-    radial-gradient(circle at 4% 62%, rgba(194, 61, 23, 0.14) 0%, transparent 40%),
-    radial-gradient(circle at 45% 98%, rgba(215, 154, 44, 0.16) 0%, transparent 42%),
-    radial-gradient(circle at 60% 30%, rgba(32, 43, 94, 0.08) 0%, transparent 50%);
-}
-
-/* Faint dot grid on top of the aurora for a bit of tactile texture. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(20, 22, 27, 0.16) 1px, transparent 1px);
-  background-size: 26px 26px;
-  opacity: 0.4;
-  -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, black 35%, transparent 90%);
-  mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, black 35%, transparent 90%);
+    radial-gradient(circle at 8% 6%, rgba(229, 66, 19, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 94% 2%, rgba(244, 169, 0, 0.28) 0%, transparent 36%),
+    radial-gradient(circle at 90% 55%, rgba(38, 67, 187, 0.18) 0%, transparent 44%),
+    radial-gradient(circle at 4% 62%, rgba(229, 66, 19, 0.16) 0%, transparent 40%),
+    radial-gradient(circle at 45% 98%, rgba(244, 169, 0, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 60% 30%, rgba(38, 67, 187, 0.1) 0%, transparent 50%);
 }
 
 ::selection {
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* Invisible scrollbars everywhere — scrolling still works, the bar itself
+   never renders, on any element (page body or an internal overflow box). */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge/IE */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge (Chromium) */
+}
+
+*:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 75%, white);
+  outline-offset: 3px;
 }
 
 @keyframes pulse-star {

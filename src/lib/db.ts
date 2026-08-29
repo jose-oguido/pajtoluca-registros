@@ -10,13 +10,18 @@ declare global {
 const dataDir = path.join(process.cwd(), "data");
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-const db = global.__jajDb ?? new Database(path.join(dataDir, "jaj.db"));
+// timeout: Next.js can spawn several build workers that open this same
+// file at once. On a brand-new database (no volume yet, e.g. a fresh
+// Railway deploy) the very first writes race and throw SQLITE_BUSY; this
+// tells better-sqlite3 to retry for a bit instead of failing immediately.
+const db = global.__jajDb ?? new Database(path.join(dataDir, "jaj.db"), { timeout: 10000 });
 
 if (process.env.NODE_ENV !== "production") {
   global.__jajDb = db;
 }
 
 db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS registrations (
@@ -33,6 +38,7 @@ db.exec(`
     zona_pastoral TEXT,
     emergency_contact_name TEXT,
     emergency_contact_phone TEXT,
+    discovery_reason TEXT,
     notes TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
@@ -60,6 +66,45 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_parishes_decanato_id ON parishes(decanato_id);
+
+  CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS admin_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_user_id INTEGER NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_admin_sessions_token_hash ON admin_sessions(token_hash);
+  CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at ON admin_sessions(expires_at);
+
+  CREATE TABLE IF NOT EXISTS staff_access_codes (
+    registration_type TEXT PRIMARY KEY,
+    code_hash TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS coordinator_report_batches (
+    decanato_id TEXT NOT NULL REFERENCES decanatos(id) ON DELETE CASCADE,
+    batch_number INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sent_at TEXT,
+    PRIMARY KEY (decanato_id, batch_number)
+  );
 `);
 
 // Migration: older databases created before ticket_id existed. Safe to run
@@ -69,6 +114,12 @@ const registrationColumns = db.prepare(`PRAGMA table_info(registrations)`).all()
 }[];
 if (!registrationColumns.some((col) => col.name === "ticket_id")) {
   db.exec(`ALTER TABLE registrations ADD COLUMN ticket_id TEXT`);
+}
+if (!registrationColumns.some((col) => col.name === "registration_type")) {
+  db.exec(`ALTER TABLE registrations ADD COLUMN registration_type TEXT NOT NULL DEFAULT 'attendee'`);
+}
+if (!registrationColumns.some((col) => col.name === "discovery_reason")) {
+  db.exec(`ALTER TABLE registrations ADD COLUMN discovery_reason TEXT`);
 }
 
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_ticket_id ON registrations(ticket_id)`);

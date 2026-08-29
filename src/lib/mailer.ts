@@ -1,6 +1,15 @@
 import { Resend } from "resend";
-import { getDecanatoById } from "./directory";
-import { getAllRegistrationsForExport, type Registration } from "./registrations";
+import { getDecanatoById, getDecanatoByName } from "./directory";
+import { getEmailSettings, getEmailSettingsStatus } from "./email-settings";
+import {
+  claimCoordinatorReportBatch,
+  COORDINATOR_REPORT_INTERVAL,
+  getAllRegistrationsForExport,
+  getDecanatoRegistrationCount,
+  markCoordinatorReportBatchSent,
+  releaseCoordinatorReportBatch,
+  type Registration,
+} from "./registrations";
 import { eventConfig } from "./event-config";
 
 function csvEscape(value: string): string {
@@ -18,6 +27,7 @@ function buildCsv(rows: Registration[]): string {
     "edad",
     "telefono",
     "correo",
+    "como_se_entero_y_motivo",
     "notas",
     "registrado_en",
   ];
@@ -31,6 +41,7 @@ function buildCsv(rows: Registration[]): string {
         String(row.age),
         csvEscape(row.phone),
         csvEscape(row.email ?? ""),
+        csvEscape(row.discovery_reason ?? ""),
         csvEscape(row.notes ?? ""),
         row.created_at,
       ].join(",")
@@ -42,9 +53,9 @@ function buildCsv(rows: Registration[]): string {
 export async function sendDecanatoReport(
   decanatoId: string
 ): Promise<{ count: number; decanatoName: string; email: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const { apiKey, fromEmail } = getEmailSettings();
   if (!apiKey) {
-    throw new Error("Falta configurar RESEND_API_KEY en las variables de entorno.");
+    throw new Error("Configura el correo de envío en Admin > Accesos antes de enviar reportes.");
   }
 
   const decanato = getDecanatoById(decanatoId);
@@ -62,11 +73,10 @@ export async function sendDecanatoReport(
 
   const csv = buildCsv(rows);
   const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM_EMAIL || "JAJ Pajtoluca <onboarding@resend.dev>";
   const greetingName = decanato.coordinator_name ? decanato.coordinator_name : "";
 
   const { error } = await resend.emails.send({
-    from,
+    from: fromEmail,
     to: decanato.coordinator_email,
     subject: `Registros de la ${eventConfig.edition} ${eventConfig.name} - Decanato ${decanato.name}`,
     text: [
@@ -90,4 +100,33 @@ export async function sendDecanatoReport(
   }
 
   return { count: rows.length, decanatoName: decanato.name, email: decanato.coordinator_email };
+}
+
+export async function sendAutomaticDecanatoReportIfDue(
+  decanatoName: string | null | undefined
+): Promise<{ sent: boolean }> {
+  if (!decanatoName || !getEmailSettingsStatus().configured) return { sent: false };
+
+  const decanato = getDecanatoByName(decanatoName);
+  if (!decanato?.coordinator_email) return { sent: false };
+
+  const registrationCount = getDecanatoRegistrationCount(decanato.name);
+  const batchNumber = Math.floor(registrationCount / COORDINATOR_REPORT_INTERVAL);
+  if (batchNumber < 1) return { sent: false };
+
+  // The unique batch record is an atomic claim. Concurrent registrations can
+  // both reach the threshold, but only one request gets to send that report.
+  if (!claimCoordinatorReportBatch(decanato.id, batchNumber)) return { sent: false };
+
+  try {
+    await sendDecanatoReport(decanato.id);
+    markCoordinatorReportBatchSent(decanato.id, batchNumber);
+    return { sent: true };
+  } catch (error) {
+    // A failed delivery never blocks someone from receiving their ticket. By
+    // releasing the claim, a later registration (or the manual button) can retry.
+    releaseCoordinatorReportBatch(decanato.id, batchNumber);
+    console.error(`No se pudo enviar el reporte automático de ${decanato.name}.`, error);
+    return { sent: false };
+  }
 }

@@ -8,12 +8,12 @@ export const eventConfig = {
   organizer: "PAJ Toluca",
   date: "Sábado 10 de octubre de 2026",
   dateShort: "10 oct. 2026",
-  scheduleText: "Por confirmar",
+  scheduleText: "7:00 - 16:00 hrs.",
   location: "Toluca, Estado de México",
   venueName: "Seminario Diocesano de Toluca",
   // Ya incluye "Toluca" (viene en venueName), por eso aquí no se repite.
   venueAddress: "Seminario Diocesano de Toluca, Estado de México",
-  capacity: 1200,
+  capacity: 15000,
   contactEmail: "registro@pajtoluca.org",
   contactPhone: "+52 722 000 0000",
   // OJO: esta fecha era correcta cuando el evento era el 14 de noviembre.

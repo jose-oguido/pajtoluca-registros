@@ -55,8 +55,11 @@ export function Hero({ flyerSrc }: { flyerSrc: string | null }) {
           </div>
 
           <h1 className="mt-5 text-balance font-display text-5xl font-bold uppercase leading-[1.05] tracking-tight lg:text-6xl">
-            Un día entero de{" "}
-            <span className="text-accent">fe, música</span> y comunidad.
+            Ven a Betania,
+            <br />
+            <span className="text-accent">El Maestro</span>
+            <br />
+            te espera.
           </h1>
 
           <p className="mx-auto mt-3 max-w-[38ch] text-xl font-semibold uppercase leading-snug text-muted-foreground lg:mx-0 lg:text-xl">
