@@ -7,14 +7,18 @@ declare global {
   var __jajDb: Database.Database | undefined;
 }
 
-const dataDir = path.join(process.cwd(), "data");
+const dbPath = process.env.DATABASE_PATH
+  ? process.env.DATABASE_PATH
+  : path.join(process.cwd(), "data", "jaj.db");
+
+const dataDir = path.dirname(dbPath);
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
 // timeout: Next.js can spawn several build workers that open this same
 // file at once. On a brand-new database (no volume yet, e.g. a fresh
 // Railway deploy) the very first writes race and throw SQLITE_BUSY; this
 // tells better-sqlite3 to retry for a bit instead of failing immediately.
-const db = global.__jajDb ?? new Database(path.join(dataDir, "jaj.db"), { timeout: 10000 });
+const db = global.__jajDb ?? new Database(dbPath, { timeout: 10000 });
 
 if (process.env.NODE_ENV !== "production") {
   global.__jajDb = db;
