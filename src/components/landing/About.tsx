@@ -1,26 +1,26 @@
-import { HandsPraying, MusicNotes, UsersThree } from "@phosphor-icons/react/dist/ssr";
+import { Compass, HandsPraying, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import { eventConfig } from "@/lib/event-config";
 import { Reveal } from "./Reveal";
 
 const pillars = [
   {
-    icon: MusicNotes,
-    title: "Alabanza en vivo",
-    description: "Música y adoración que reúne a todos los grupos en un mismo canto.",
+    icon: HandsPraying,
+    title: "Encuentro con Jesucristo",
+    description: "Espacios de escucha, discernimiento, conversión y misión para descubrir la vocación.",
     bg: "bg-accent-soft",
     badge: "bg-accent text-accent-contrast",
   },
   {
-    icon: UsersThree,
-    title: "Talleres por edad",
-    description: "Espacios formativos pensados para adolescentes, jóvenes y sus líderes.",
+    icon: Compass,
+    title: "Rumbo a la Ruta 2031-2033",
+    description: "Preparación hacia los 500 años de las apariciones de la Virgen de Guadalupe y los 2000 años de la Redención.",
     bg: "bg-secondary-soft",
     badge: "bg-secondary text-secondary-contrast",
   },
   {
-    icon: HandsPraying,
-    title: "Testimonios y oración",
-    description: "Historias reales que abren espacio para el encuentro personal con Cristo.",
+    icon: UsersThree,
+    title: "Protagonistas de transformación",
+    description: "Jóvenes que renuevan la esperanza y construyen una civilización del amor.",
     bg: "bg-gold-soft",
     badge: "bg-gold text-secondary-contrast",
   },
@@ -31,13 +31,12 @@ export function About() {
     <section id="sobre-la-jaj" className="mx-auto max-w-7xl px-6 py-20 sm:px-6 lg:px-8 lg:py-28">
       <Reveal className="max-w-[62ch] text-center lg:text-left">
         <h2 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">
-          ¿Qué es la {eventConfig.name}?
+          Objetivo de la {eventConfig.name}
         </h2>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:mt-5 sm:text-lg">
-          La {eventConfig.fullName} es el encuentro anual que reúne a los grupos juveniles de{" "}
-          {eventConfig.location} en un solo día de fe, música y comunidad. Es organizado por{" "}
-          {eventConfig.organizer} junto con las parroquias participantes, con un cupo limitado a{" "}
-          {eventConfig.capacity.toLocaleString("es-MX")} jóvenes.
+          Fortalecer la fe, identidad y compromiso de los jóvenes de la Arquidiócesis de Toluca
+          mediante un encuentro vivo con Jesucristo, preparando el corazón y la misión rumbo a los
+          grandes acontecimientos de la Ruta 2031-2033.
         </p>
       </Reveal>
 

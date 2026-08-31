@@ -25,8 +25,8 @@ export const eventConfig = {
 
 // Reemplaza estos "#" con los enlaces reales de cada red social.
 export const socialLinks = {
-  instagram: "#",
-  facebook: "#",
-  tiktok: "#",
-  youtube: "#",
+  instagram: "https://www.instagram.com/paj.toluca?igsi=MW1lNG11c2JxOWhkYw==",
+  facebook: "https://www.facebook.com/share/1Fd4zYdFZF/",
+  tiktok: "https://www.tiktok.com/@paj.toluca?_r=1&_t=ZS-99KVrMuwIbd",
+  youtube: "https://www.youtube.com/@pajtoluca",
 } as const;
