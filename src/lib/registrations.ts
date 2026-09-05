@@ -186,6 +186,36 @@ export function getAgeCategoryBreakdown(): { category: string; count: number }[]
     .all() as { category: string; count: number }[];
 }
 
+export type DiscoveryReasonResponse = Pick<
+  Registration,
+  "id" | "full_name" | "discovery_reason" | "created_at"
+>;
+
+export function getDiscoveryReasonResponses(limit = 100): {
+  total: number;
+  responses: DiscoveryReasonResponse[];
+} {
+  const totalRow = db
+    .prepare(
+      `SELECT COUNT(*) as count FROM registrations WHERE NULLIF(TRIM(discovery_reason), '') IS NOT NULL`
+    )
+    .get() as { count: number };
+
+  const responses = db
+    .prepare(
+      `
+      SELECT id, full_name, discovery_reason, created_at
+      FROM registrations
+      WHERE NULLIF(TRIM(discovery_reason), '') IS NOT NULL
+      ORDER BY created_at DESC
+      LIMIT ?
+      `
+    )
+    .all(limit) as DiscoveryReasonResponse[];
+
+  return { total: totalRow.count, responses };
+}
+
 export function getRegistrationTypeBreakdown(): { type: string; count: number }[] {
   // Sacerdotes aren't part of the "staff / puestos" concept this powers —
   // they're admin-added one at a time and shown via their own count instead.

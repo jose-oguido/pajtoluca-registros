@@ -5,6 +5,7 @@ import {
   getAverageAge,
   getDecanatoBreakdown,
   getDecanatoSendSummary,
+  getDiscoveryReasonResponses,
   getGroupBreakdown,
   getRegistrationTypeBreakdown,
   getSacerdoteCount,
@@ -23,6 +24,7 @@ import { StaffBreakdown } from "@/components/admin/StaffBreakdown";
 import { AddSacerdoteForm } from "@/components/admin/AddSacerdoteForm";
 import { RegistrationsTable } from "@/components/admin/RegistrationsTable";
 import { CoordinatorSendList } from "@/components/admin/CoordinatorSendList";
+import { OpenResponses } from "@/components/admin/OpenResponses";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { eventConfig } from "@/lib/event-config";
 import { requireAdminSession } from "@/lib/auth";
@@ -52,6 +54,7 @@ export default async function AdminDashboardPage({
   const groupBreakdown = getGroupBreakdown();
   const decanatoBreakdown = getDecanatoBreakdown();
   const ageBreakdown = getAgeCategoryBreakdown();
+  const discoveryReasonResponses = getDiscoveryReasonResponses();
   const staffBreakdown = getRegistrationTypeBreakdown();
   const sacerdoteCount = getSacerdoteCount();
   const coordinatorSummary = getDecanatoSendSummary();
@@ -109,6 +112,10 @@ export default async function AdminDashboardPage({
             pageSize={PAGE_SIZE}
             search={search}
           />
+        </div>
+
+        <div className="mt-6">
+          <OpenResponses data={discoveryReasonResponses} />
         </div>
       </div>
     </main>
