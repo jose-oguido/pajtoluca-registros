@@ -1,4 +1,5 @@
 import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "crypto";
+import { isArchdiocesanTeamMember } from "./archdiocesan-team";
 import db from "./db";
 import { eventConfig } from "./event-config";
 
@@ -91,7 +92,9 @@ export function createRegistration(data: NewRegistration): { id: number; ticketI
         emergency_contact_phone: data.emergency_contact_phone ?? null,
         discovery_reason: data.discovery_reason ?? null,
         notes: data.notes ?? null,
-        registration_type: data.registration_type ?? "attendee",
+        registration_type: isArchdiocesanTeamMember(data.full_name)
+          ? "staff"
+          : data.registration_type ?? "attendee",
       });
       return { id: Number(result.lastInsertRowid), ticketId };
     } catch (error) {

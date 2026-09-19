@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
+import { isArchdiocesanTeamMember } from "./archdiocesan-team";
 import { SEED_GROUPS } from "./directory-seed";
 
 declare global {
@@ -127,6 +128,24 @@ if (!registrationColumns.some((col) => col.name === "discovery_reason")) {
 }
 
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_ticket_id ON registrations(ticket_id)`);
+
+// This is deliberately idempotent: on a production deploy it corrects the
+// coordinators who registered before this rule existed, while future records
+// are classified in createRegistration.
+const registrationsToClassify = db
+  .prepare(`SELECT id, full_name FROM registrations WHERE registration_type <> 'staff'`)
+  .all() as { id: number; full_name: string }[];
+const promoteArchdiocesanTeam = db.prepare(
+  `UPDATE registrations SET registration_type = 'staff' WHERE id = ?`
+);
+const classifyArchdiocesanTeam = db.transaction((registrations: { id: number; full_name: string }[]) => {
+  for (const registration of registrations) {
+    if (isArchdiocesanTeamMember(registration.full_name)) {
+      promoteArchdiocesanTeam.run(registration.id);
+    }
+  }
+});
+classifyArchdiocesanTeam(registrationsToClassify);
 
 const decanatoCount = (db.prepare(`SELECT COUNT(*) as count FROM decanatos`).get() as { count: number })
   .count;
