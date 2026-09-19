@@ -1,0 +1,465 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&display=swap");
+
+.screenOnly {
+  display: block;
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  justify-items: center;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.printPages {
+  display: none;
+}
+
+.badge {
+  display: flex;
+  width: min(100%, 460px);
+  aspect-ratio: 95 / 130;
+  overflow: hidden;
+  background: #ffffff;
+  outline: 0.2mm dashed #c8c8c8;
+  outline-offset: 0;
+  font-family: "Barlow Condensed", "Arial Narrow", var(--font-jakarta), sans-serif;
+}
+
+.spine {
+  flex: 0 0 9.474%;
+  background-color: var(--role-color);
+  background-image: url("/gafetes/lomo-texture.png");
+  background-position: center top;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+}
+
+.badgeContent {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.brandStrip {
+  display: flex;
+  align-items: center;
+  gap: 2.2%;
+  background: #ffc907;
+  padding: 3% 3.7%;
+}
+
+.brandLogo {
+  width: 12%;
+  height: auto;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.brandLockup {
+  min-width: 0;
+  flex: 1;
+  max-height: 42px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.frontZone {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 7% 5% 0;
+}
+
+.watermark {
+  position: absolute;
+  bottom: -2%;
+  left: 50%;
+  width: 111%;
+  max-width: none;
+  transform: translateX(-50%);
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.greeting,
+.givenName,
+.lastName,
+.origin,
+.frontMeta {
+  position: relative;
+}
+
+.greeting {
+  margin: 0 0 2px;
+  color: #1b75a8;
+  font-family: "Fredoka", var(--font-sora), sans-serif;
+  font-size: clamp(14px, 1.35vw, 20px);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.givenName {
+  margin: 0;
+  color: #12455f;
+  font-family: "Barlow Condensed", "Arial Narrow", var(--font-jakarta), sans-serif;
+  font-size: clamp(32px, 3.7vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.lastName {
+  margin: 7px 0 0;
+  color: #1b75a8;
+  font-size: clamp(17px, 1.85vw, 27px);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.roleLine {
+  position: relative;
+  width: 16%;
+  height: 4px;
+  margin: 16px 0 14px;
+  border-radius: 999px;
+  background: var(--role-color);
+}
+
+.origin {
+  max-width: 78%;
+  margin: 0;
+  color: #3f5a68;
+  font-size: clamp(14px, 1.35vw, 20px);
+  font-weight: 600;
+  line-height: 1.18;
+}
+
+.origin span {
+  display: block;
+  margin-top: 3px;
+  color: #7e8f99;
+  font-weight: 400;
+}
+
+.frontMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 5% 3%;
+  color: #6e828d;
+  font-size: clamp(10px, 1vw, 14px);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.frontFolio {
+  max-width: 45%;
+  color: #9aa9b2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.roleBand {
+  background: var(--role-color);
+  color: var(--role-text);
+  padding: 4.5% 5%;
+  font-size: clamp(21px, 2.1vw, 31px);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.roleBandCompact {
+  font-size: clamp(16px, 1.55vw, 23px);
+}
+
+.backBody {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-bottom: 22%;
+}
+
+.lema {
+  display: block;
+  width: 31%;
+  margin: 7% auto 0;
+}
+
+.program {
+  position: relative;
+  z-index: 1;
+  margin-top: 5%;
+  padding: 0 6%;
+}
+
+.program h2 {
+  margin: 0 0 5px;
+  color: #ee7b23;
+  font-family: "Fredoka", var(--font-sora), sans-serif;
+  font-size: clamp(16px, 1.55vw, 22px);
+  font-weight: 700;
+}
+
+.program ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.program li {
+  display: flex;
+  gap: 3%;
+  padding: 2px 0;
+  border-bottom: 1px dotted #dce3e7;
+  color: #3f5a68;
+  font-size: clamp(12px, 1.15vw, 17px);
+  line-height: 1.25;
+}
+
+.program li b {
+  flex: 0 0 23%;
+  color: #1b75a8;
+  font-variant-numeric: tabular-nums;
+}
+
+.backFooter {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 4%;
+  margin-top: auto;
+  padding: 0 6% 5%;
+}
+
+.qr {
+  width: 17%;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.contactLine {
+  min-width: 0;
+  flex: 1;
+}
+
+.contactLine p {
+  margin: 0 0 4px;
+  color: #6e828d;
+  font-size: clamp(11px, 1.05vw, 15px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.contactLine span {
+  display: block;
+  height: 20px;
+  border-bottom: 2px solid #c6d0d6;
+}
+
+.waves {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 22%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+@media (min-width: 760px) {
+  .previewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@page {
+  size: letter;
+  margin: 0;
+}
+
+@media print {
+  :global(body) {
+    background: #ffffff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .screenOnly {
+    display: none !important;
+  }
+
+  .printPages {
+    display: block !important;
+  }
+
+  .printPage {
+    display: grid;
+    width: 215mm;
+    height: 279mm;
+    grid-template-columns: repeat(2, 95mm);
+    grid-template-rows: repeat(2, 130mm);
+    gap: 2mm;
+    padding: 8.5mm 11.5mm;
+    overflow: hidden;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .printPage:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .badge,
+  .printBlank {
+    width: 95mm;
+    height: 130mm;
+    min-height: 130mm;
+    aspect-ratio: auto;
+  }
+
+  .badge {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .brandStrip {
+    gap: 2.2mm;
+    padding: 3mm 3.5mm;
+  }
+
+  .brandLogo {
+    width: 10mm;
+  }
+
+  .brandLockup {
+    max-height: 11mm;
+  }
+
+  .frontZone {
+    padding: 7mm 4mm 0;
+  }
+
+  .watermark {
+    bottom: -3mm;
+    width: 94mm;
+  }
+
+  .greeting {
+    margin-bottom: 1mm;
+    font-size: 4.1mm;
+  }
+
+  .givenName {
+    font-size: 13mm;
+  }
+
+  .lastName {
+    margin-top: 1.4mm;
+    font-size: 6.4mm;
+  }
+
+  .roleLine {
+    width: 14mm;
+    height: 0.9mm;
+    margin: 3mm 0 2.6mm;
+  }
+
+  .origin {
+    max-width: 66mm;
+    font-size: 4.2mm;
+  }
+
+  .origin span {
+    margin-top: 0;
+  }
+
+  .frontMeta {
+    gap: 3mm;
+    padding: 0 4mm 1.8mm;
+    font-size: 3.6mm;
+  }
+
+  .roleBand,
+  .roleBandCompact {
+    padding: 3.4mm 4mm;
+    font-size: 6.8mm;
+  }
+
+  .roleBandCompact {
+    font-size: 4.8mm;
+  }
+
+  .backBody {
+    padding-bottom: 27mm;
+  }
+
+  .lema {
+    width: 26mm;
+    margin-top: 4.5mm;
+  }
+
+  .program {
+    margin-top: 3mm;
+    padding: 0 5mm;
+  }
+
+  .program h2 {
+    margin-bottom: 1.2mm;
+    font-size: 4mm;
+  }
+
+  .program li {
+    gap: 2.4mm;
+    padding: 0.28mm 0;
+    border-bottom-width: 0.2mm;
+    font-size: 3.4mm;
+  }
+
+  .program li b {
+    flex-basis: 12.5mm;
+  }
+
+  .backFooter {
+    gap: 3mm;
+    padding: 0 5mm 2.5mm;
+  }
+
+  .qr {
+    width: 14mm;
+  }
+
+  .contactLine p {
+    margin-bottom: 0.5mm;
+    font-size: 3.4mm;
+  }
+
+  .contactLine span {
+    height: 5.5mm;
+    border-bottom-width: 0.4mm;
+  }
+
+  .waves {
+    height: 26mm;
+  }
+}

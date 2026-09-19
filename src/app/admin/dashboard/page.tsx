@@ -8,6 +8,7 @@ import {
   getDiscoveryReasonResponses,
   getGroupBreakdown,
   getRegistrationTypeBreakdown,
+  getRegistrationsWithoutDecanato,
   getSacerdoteCount,
   getTimeline,
   getTodayCount,
@@ -25,9 +26,11 @@ import { AddSacerdoteForm } from "@/components/admin/AddSacerdoteForm";
 import { RegistrationsTable } from "@/components/admin/RegistrationsTable";
 import { CoordinatorSendList } from "@/components/admin/CoordinatorSendList";
 import { OpenResponses } from "@/components/admin/OpenResponses";
+import { UnassignedDecanatoList } from "@/components/admin/UnassignedDecanatoList";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { eventConfig } from "@/lib/event-config";
 import { requireAdminSession } from "@/lib/auth";
+import { getDecanatos } from "@/lib/directory";
 
 export const metadata: Metadata = {
   title: `Panel de organizadores · ${eventConfig.name}`,
@@ -57,6 +60,8 @@ export default async function AdminDashboardPage({
   const discoveryReasonResponses = getDiscoveryReasonResponses();
   const staffBreakdown = getRegistrationTypeBreakdown();
   const sacerdoteCount = getSacerdoteCount();
+  const unassignedRegistrations = getRegistrationsWithoutDecanato();
+  const decanatos = getDecanatos().map(({ id, name }) => ({ id, name }));
   const coordinatorSummary = getDecanatoSendSummary();
   const { rows, total: searchTotal } = listRegistrations({
     search,
@@ -97,11 +102,15 @@ export default async function AdminDashboardPage({
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <StaffBreakdown data={staffBreakdown} />
-          <AddSacerdoteForm count={sacerdoteCount} />
+          <AddSacerdoteForm count={sacerdoteCount} decanatos={decanatos} />
         </div>
 
         <div className="mt-6">
           <CoordinatorSendList decanatos={coordinatorSummary} />
+        </div>
+
+        <div className="mt-6">
+          <UnassignedDecanatoList rows={unassignedRegistrations} decanatos={decanatos} />
         </div>
 
         <div className="mt-6">

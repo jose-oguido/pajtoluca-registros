@@ -12,6 +12,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
+      suppressHydrationWarning
       className="inline-flex w-full items-center justify-center rounded-full bg-accent px-7 py-3.5 text-base font-semibold uppercase tracking-wide text-accent-contrast transition-transform active:scale-[0.98] disabled:opacity-60"
     >
       {pending ? "Ingresando..." : "Ingresar"}
@@ -33,6 +34,7 @@ export function LoginForm() {
           name="username"
           type="text"
           autoComplete="username"
+          suppressHydrationWarning
           className="w-full rounded-[12px] border border-border bg-surface px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
         />
       </div>
@@ -46,6 +48,7 @@ export function LoginForm() {
           name="password"
           type="password"
           autoComplete="current-password"
+          suppressHydrationWarning
           className="w-full rounded-[12px] border border-border bg-surface px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
         />
       </div>

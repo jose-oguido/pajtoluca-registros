@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdminSession, updateAdminAccount } from "@/lib/auth";
+import { setCoordinatorScannerCode } from "@/lib/coordinator-scanner-access";
 import { getEmailSettingsStatus, saveEmailSettings } from "@/lib/email-settings";
 import { setStaffAccessCode } from "@/lib/staff-access";
 import { isStaffRegistrationType, type StaffRegistrationType } from "@/lib/registration-types";
@@ -55,6 +56,22 @@ export async function updateStaffCodeAction(
   setStaffAccessCode(type, code);
   revalidatePath("/admin/accesos");
   return { status: "success", message: "El código se guardó. Comparte sólo la nueva versión con el equipo." };
+}
+
+export async function updateCoordinatorScannerCodeAction(
+  _prevState: AccessSettingsState,
+  formData: FormData
+): Promise<AccessSettingsState> {
+  await requireAdminSession();
+  const code = String(formData.get("access_code") ?? "").trim();
+
+  if (code.length < 8) {
+    return { status: "error", message: "El código debe tener al menos 8 caracteres." };
+  }
+
+  setCoordinatorScannerCode(code);
+  revalidatePath("/admin/accesos");
+  return { status: "success", message: "El código del lector se guardó. Al cambiarlo se cerrarán los lectores abiertos." };
 }
 
 export async function updateEmailSettingsAction(

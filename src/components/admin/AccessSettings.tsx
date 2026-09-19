@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { CheckCircle, EnvelopeSimple, Key, ShieldCheck, WarningCircle } from "@phosphor-icons/react";
-import { updateAccountAction, updateEmailSettingsAction, updateStaffCodeAction } from "@/app/admin/accesos/actions";
+import { updateAccountAction, updateCoordinatorScannerCodeAction, updateEmailSettingsAction, updateStaffCodeAction } from "@/app/admin/accesos/actions";
 import { initialAccessSettingsState } from "@/app/admin/accesos/state";
 import type { StaffRegistrationType } from "@/lib/registration-types";
 
@@ -95,6 +95,30 @@ function StaffCodeForm({ type, label, configured }: { type: StaffRegistrationTyp
   );
 }
 
+function CoordinatorScannerCodeForm({ configured }: { configured: boolean }) {
+  const [state, formAction] = useActionState(updateCoordinatorScannerCodeAction, initialAccessSettingsState);
+  return (
+    <section className="rounded-[20px] border border-border bg-surface p-5 shadow-lg shadow-secondary/5 sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-soft text-secondary"><Key size={20} weight="fill" /></span>
+        <div>
+          <h2 className="font-display text-lg font-bold uppercase tracking-tight">Lector del equipo</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Protege <code>/equipo</code> con un código distinto al de administración. El equipo podrá consultar los registros mediante el QR del gafete.</p>
+        </div>
+      </div>
+      <form action={formAction} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end" noValidate>
+        <div className="min-w-0 flex-1">
+          <label htmlFor="coordinator-scanner-code" className="mb-1 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">{configured ? "Reemplazar código" : "Código de acceso"}</label>
+          <input id="coordinator-scanner-code" name="access_code" type="password" autoComplete="new-password" className={inputClass} />
+          <p className="mt-1.5 text-xs text-muted-foreground">{configured ? "Está configurado y no se vuelve a mostrar. Guardar uno nuevo cerrará las sesiones abiertas." : "Crea un código de al menos 8 caracteres antes de usar el lector."}</p>
+        </div>
+        <SubmitButton>{configured ? "Reemplazar" : "Activar lector"}</SubmitButton>
+      </form>
+      <StateMessage {...state} />
+    </section>
+  );
+}
+
 function EmailSettingsForm({ configured, fromEmail }: { configured: boolean; fromEmail: string }) {
   const [state, formAction] = useActionState(updateEmailSettingsAction, initialAccessSettingsState);
   return (
@@ -121,10 +145,12 @@ export function AccessSettings({
   username,
   staffCodes,
   emailSettings,
+  coordinatorScanner,
 }: {
   username: string;
   staffCodes: { type: StaffRegistrationType; label: string; configured: boolean }[];
   emailSettings: { configured: boolean; fromEmail: string };
+  coordinatorScanner: { configured: boolean };
 }) {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -150,6 +176,7 @@ export function AccessSettings({
           {staffCodes.map((staffCode) => <StaffCodeForm key={staffCode.type} {...staffCode} />)}
         </div>
       </section>
+      <CoordinatorScannerCodeForm configured={coordinatorScanner.configured} />
       <section className="rounded-[20px] border border-border bg-surface p-5 shadow-lg shadow-secondary/5 sm:p-6 lg:col-span-2">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold-soft text-secondary"><EnvelopeSimple size={20} weight="fill" /></span>

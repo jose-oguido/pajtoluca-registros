@@ -23,7 +23,13 @@ function SubmitButton() {
   );
 }
 
-export function AddSacerdoteForm({ count }: { count: number }) {
+export function AddSacerdoteForm({
+  count,
+  decanatos,
+}: {
+  count: number;
+  decanatos: { id: string; name: string }[];
+}) {
   const [state, formAction] = useActionState(addSacerdoteAction, initialSendReportState);
 
   return (
@@ -34,7 +40,7 @@ export function AddSacerdoteForm({ count }: { count: number }) {
         por un formulario público; se agregan aquí directamente.
       </p>
 
-      <form action={formAction} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[2fr_1fr_1.2fr_auto] sm:items-end">
+      <form action={formAction} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1.2fr_1.5fr_auto] lg:items-end">
         <div>
           <label htmlFor="sacerdote_full_name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Nombre completo
@@ -52,6 +58,17 @@ export function AddSacerdoteForm({ count }: { count: number }) {
             Teléfono
           </label>
           <input id="sacerdote_phone" name="phone" type="tel" placeholder="10 dígitos" className={fieldClass} />
+        </div>
+        <div>
+          <label htmlFor="sacerdote_decanato" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Decanato
+          </label>
+          <select id="sacerdote_decanato" name="decanato_id" defaultValue="" className={fieldClass}>
+            <option value="" disabled>Selecciona</option>
+            {decanatos.map((decanato) => (
+              <option key={decanato.id} value={decanato.id}>{decanato.name}</option>
+            ))}
+          </select>
         </div>
         <SubmitButton />
       </form>
