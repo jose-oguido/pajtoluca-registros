@@ -5,13 +5,7 @@ import { Camera, MagnifyingGlass, QrCode, SignOut, UserCircle, WarningCircle } f
 import { lockCoordinatorScannerAction, lookupCoordinatorRegistrationAction } from "@/app/equipo/actions";
 import { initialScannerLookupState } from "@/app/equipo/state";
 
-type BarcodeDetectorInstance = {
-  detect: (source: ImageBitmapSource) => Promise<{ rawValue: string }[]>;
-};
-
-type BarcodeDetectorConstructor = new (options?: { formats?: string[] }) => BarcodeDetectorInstance;
-
-type BarcodeDetectorWindow = Window & { BarcodeDetector?: BarcodeDetectorConstructor };
+type ScannerControls = { stop: () => void };
 
 const typeLabels: Record<string, string> = {
   attendee: "Participante",
@@ -26,19 +20,16 @@ export function CoordinatorScanner() {
     initialScannerLookupState
   );
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanTimerRef = useRef<number | null>(null);
+  const scannerControlsRef = useRef<ScannerControls | null>(null);
+  const scannerRequestRef = useRef(0);
   const scanningRef = useRef(false);
   const [cameraState, setCameraState] = useState<"idle" | "starting" | "active" | "error">("idle");
   const [cameraMessage, setCameraMessage] = useState("");
 
   const stopCamera = useCallback(() => {
-    if (scanTimerRef.current !== null) {
-      window.clearInterval(scanTimerRef.current);
-      scanTimerRef.current = null;
-    }
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
+    scannerRequestRef.current += 1;
+    scannerControlsRef.current?.stop();
+    scannerControlsRef.current = null;
     scanningRef.current = false;
     setCameraState((current) => (current === "active" || current === "starting" ? "idle" : current));
   }, []);
@@ -54,50 +45,57 @@ export function CoordinatorScanner() {
   );
 
   const startCamera = useCallback(async () => {
+    if (!window.isSecureContext) {
+      setCameraState("error");
+      setCameraMessage("Para usar la cámara abre esta página con HTTPS o desde localhost.");
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraState("error");
       setCameraMessage("Este navegador no permite abrir la cámara. Escribe el folio manualmente.");
-      return;
-    }
-    const Detector = (window as BarcodeDetectorWindow).BarcodeDetector;
-    if (!Detector) {
-      setCameraState("error");
-      setCameraMessage("Tu navegador todavía no reconoce códigos QR desde la cámara. Usa el campo manual.");
       return;
     }
 
     stopCamera();
     setCameraState("starting");
     setCameraMessage("");
+    const requestId = scannerRequestRef.current;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: { ideal: "environment" } },
-      });
-      streamRef.current = stream;
-      if (!videoRef.current) return;
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
+      // ZXing decodes the video frames itself, unlike BarcodeDetector which
+      // Safari and some Chrome builds do not expose.
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      if (!videoRef.current || requestId !== scannerRequestRef.current) return;
 
-      const detector = new Detector({ formats: ["qr_code"] });
-      setCameraState("active");
-      scanTimerRef.current = window.setInterval(async () => {
-        if (scanningRef.current || !videoRef.current || videoRef.current.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-        try {
-          const codes = await detector.detect(videoRef.current);
-          const rawValue = codes[0]?.rawValue?.trim();
-          if (!rawValue) return;
+      const reader = new BrowserQRCodeReader();
+      const controls = await reader.decodeFromConstraints(
+        {
+          audio: false,
+          video: { facingMode: { ideal: "environment" } },
+        },
+        videoRef.current,
+        (result, _error, controls) => {
+          const rawValue = result?.getText().trim();
+          if (!rawValue || scanningRef.current) return;
           scanningRef.current = true;
+          controls.stop();
           stopCamera();
           searchValue(rawValue);
-        } catch {
-          // A frame can be unavailable while the browser switches cameras; keep scanning.
         }
-      }, 350);
-    } catch {
+      );
+
+      if (requestId !== scannerRequestRef.current) {
+        controls.stop();
+        return;
+      }
+      scannerControlsRef.current = controls;
+      setCameraState("active");
+    } catch (error) {
       stopCamera();
       setCameraState("error");
-      setCameraMessage("No pudimos abrir la cámara. Revisa el permiso y vuelve a intentarlo, o busca con el folio.");
+      const reason = error instanceof DOMException && error.name === "NotAllowedError"
+        ? "Permite el acceso a la cámara en los ajustes del navegador y vuelve a intentarlo."
+        : "No pudimos abrir la cámara. Revisa el permiso y vuelve a intentarlo, o busca con el folio.";
+      setCameraMessage(reason);
     }
   }, [searchValue, stopCamera]);
 
