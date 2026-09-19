@@ -174,6 +174,53 @@ body{background:var(--papelUI)}
   font-family:"Barlow Condensed",ui-monospace,monospace;font-size:16.5px;color:var(--tinta);font-weight:600;
 }
 
+.buscador{display:flex;gap:11px;flex-wrap:wrap}
+.buscador input{
+  flex:1 1 260px;min-width:0;font-family:"Barlow Condensed",ui-monospace,monospace;
+  font-size:23px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:12px 18px;border:2px solid var(--linea);border-radius:13px;
+  background:#FBFAF5;color:var(--tinta);transition:.15s;
+}
+.buscador input::placeholder{font-weight:400;letter-spacing:0;text-transform:none;color:#AAB7BE;font-size:19px}
+.buscador input:focus{border-color:var(--naranja);background:#fff;outline:none}
+.demo{
+  display:flex;gap:9px;align-items:flex-start;margin:14px 0 0;padding:12px 15px;
+  background:#FFF8E6;border:1px solid #F3E0A8;border-radius:12px;
+  font-size:15.5px;line-height:1.45;color:#7A6212;
+}
+.demo b{font-weight:600;color:#5E4B0A}
+
+.lista{display:none;margin:16px 0 0;border:1px solid var(--linea);border-radius:15px;background:#fff;max-height:470px;overflow:auto}
+.lista.hay{display:block}
+.listaTop{
+  position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:10px;
+  padding:12px 17px;background:#FAF8F2;border-bottom:1px solid var(--linea);
+  font-size:15.5px;color:var(--suave);
+}
+.listaTop b{font-family:"Fredoka",sans-serif;font-size:17.5px;color:var(--tinta);font-weight:600}
+.ligaBtn{
+  margin-left:auto;background:none;border:0;color:var(--azul);font-size:15.5px;
+  padding:3px 5px;font-family:inherit;text-decoration:underline;cursor:pointer;border-radius:6px;
+}
+.ligaBtn:hover{transform:none;color:var(--naranja);filter:none}
+.reng{display:flex;align-items:center;gap:13px;padding:11px 17px;border-top:1px solid #F1EEE5}
+.fol{
+  font-family:"Barlow Condensed",ui-monospace,monospace;font-weight:700;font-size:17.5px;
+  color:var(--tinta);flex:0 0 auto;min-width:64px;letter-spacing:.03em;
+}
+.nom{flex:1;min-width:0;font-size:16.5px;color:var(--texto);line-height:1.28}
+.nom i{display:block;font-style:normal;font-size:14.5px;color:var(--suave)}
+.etq{
+  font-family:"Fredoka",sans-serif;font-weight:500;font-size:13px;
+  padding:4px 12px;border-radius:999px;flex:0 0 auto;white-space:nowrap;
+}
+.quitar{background:none;border:0;color:#BCC7CD;font-size:25px;line-height:1;padding:0 4px;cursor:pointer}
+.quitar:hover{color:var(--terracota);transform:none;filter:none}
+
+.ayuda.coord{margin-top:20px;border-top:1px solid var(--linea);padding-top:18px}
+.ayuda.coord summary{color:var(--tinta)}
+.ayuda.coord .caja>p{margin:0 0 16px}
+
 .chips{display:flex;flex-wrap:wrap;gap:10px}
 .chip{
   display:inline-flex;align-items:center;gap:9px;font-size:16px;font-weight:500;
@@ -379,7 +426,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible,.drop:focus-visib
     </div>
     <span class="rotulo">Herramienta interna</span>
     <h1>Gafetes de la <em>XII Jornada</em>, listos en un minuto.</h1>
-    <p class="entrada">Sube la lista de inscritos y la página arma las hojas de impresión, con frente, reverso y código de identificación para cada persona.</p>
+    <p class="entrada">Busca a cada inscrito por su folio y la página arma las hojas de impresión, con frente, reverso y código de identificación para cada persona.</p>
     <div class="datos">
       <span class="dato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>10 de octubre</span>
       <span class="dato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>Seminario Diocesano</span>
@@ -393,30 +440,27 @@ button:focus-visible,input:focus-visible,summary:focus-visible,.drop:focus-visib
   <section class="paso" style="--tono:var(--naranja)">
     <span class="num">1</span>
     <div class="cont">
-      <h2>Sube tu lista</h2>
-      <p class="pie2">Un archivo de Excel o CSV con los inscritos. Los gafetes se generan solos.</p>
-      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Subir archivo de Excel o CSV">
-        <span class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M3.5 15v3.5A1.5 1.5 0 0 0 5 20h14a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span>
-        <b>Arrastra aquí tu Excel o CSV</b>
-        <span>o da clic para buscarlo en tu computadora</span>
-        <input type="file" id="archivo" accept=".csv,.xlsx,.xls,text/csv" hidden>
+      <h2>Busca por folio</h2>
+      <p class="pie2">Escribe el folio del inscrito y la página trae sus datos del registro. Puedes ir agregando uno tras otro y al final los imprimes todos juntos.</p>
+      <div class="buscador">
+        <input type="text" id="folioIn" placeholder="Folio, por ejemplo A-014" autocomplete="off" spellcheck="false" aria-label="Folio del inscrito">
+        <button class="b1" id="btnBuscar">Buscar</button>
       </div>
       <p class="estado" id="estado"></p>
+      <div class="lista" id="lista"></div>
       <div class="resumen" id="resumen"></div>
-      <textarea id="lista" hidden></textarea>
 
-      <details class="ayuda">
-        <summary>¿Qué columnas necesita el archivo?</summary>
+      <details class="ayuda coord">
+        <summary>¿Eres coordinador de decanato?</summary>
         <div class="caja">
-          <table>
-            <tr><td><code>Folio</code></td><td>Opcional. Si no viene, se numeran solos en el orden del archivo.</td></tr>
-            <tr><td><code>Nombre</code></td><td>Lo único obligatorio. Sale grande en el gafete.</td></tr>
-            <tr><td><code>Apellidos</code></td><td>También acepta <code>Paterno</code> y <code>Materno</code> por separado.</td></tr>
-            <tr><td><code>Comunidad</code></td><td>o <code>Parroquia</code>.</td></tr>
-            <tr><td><code>Decanato</code></td><td></td></tr>
-            <tr><td><code>Rol</code></td><td>o <code>Tipo</code>. Uno de los de abajo.</td></tr>
-          </table>
-          El orden de las columnas no importa, ni los acentos ni las mayúsculas del encabezado. Si traes una sola columna con el nombre completo, también funciona.
+          <p>Si traes muchos gafetes de tu decanato, sube un archivo de Excel o CSV con <b>una sola columna de folios</b>. La página consulta cada uno en el registro y arma la tanda completa. No necesitas capturar nombres ni parroquias: esos salen de la base de datos.</p>
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Subir archivo de folios">
+            <span class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M3.5 15v3.5A1.5 1.5 0 0 0 5 20h14a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span>
+            <b>Arrastra aquí tu archivo de folios</b>
+            <span>Excel o CSV, una columna llamada Folio</span>
+            <input type="file" id="archivo" accept=".csv,.xlsx,.xls,text/csv" hidden>
+          </div>
+          <p class="estado" id="estadoLote"></p>
           <div class="acciones"><button type="button" class="b3" id="plantillaCsv">Descargar plantilla CSV</button></div>
         </div>
       </details>
@@ -429,7 +473,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible,.drop:focus-visib
       <h2>Los tipos de gafete</h2>
       <p class="pie2">Cada tipo tiene su color en la cenefa y en la banda del nombre.</p>
       <div class="chips" id="chips"></div>
-      <p class="nota">Escribe el rol en tu archivo tal como aparece aquí. No importan acentos, mayúsculas ni el punto final. Si no coincide con ninguno, te aviso y ese gafete sale como Joven.</p>
+      <p class="nota">El tipo lo trae el registro junto con el nombre. No importan acentos, mayúsculas ni el punto final; si el rol que llega no coincide con ninguno de estos, el gafete sale como Joven.</p>
     </div>
   </section>
 
@@ -490,25 +534,53 @@ const SALUDO = "hola, soy";
 const rolExacto = t => ROLES.find(r => simp(r.clave) === simp(t));
 const rolDe = t => rolExacto(t) || ROLES[0];
 
-const EJEMPLO = [
-  "María Fernanda / García López | San José Obrero | Toluca Centro | Joven",
-  "Diego / Hernández Mejía | Sagrado Corazón | Metepec | Adolescente",
-  "Ana Sofía / Reyes Vargas | Santa María de Guadalupe | Zinacantepec | Joven",
-  "Emiliano / Ortiz Nava | San Juan Bautista | Tenango | Adolescente",
-  "Regina / Campos Estrada | Espíritu Santo | Lerma | Voluntario",
-  "Santiago / Peña Bermúdez | San Pedro Apóstol | Tianguistenco | Ministro Ex.",
-  "Ximena / Aguilar Rosas | Nuestra Señora del Carmen | Ixtlahuaca | Voluntario",
-  "Alejandro / Nava Quintero | Catedral de San José | Toluca Centro | Ministro Ex."
-].join("\n");
+/* ====================================================================
+   CONEXIÓN CON EL REGISTRO
+   Pon aquí la dirección de tu API. Debe responder a
+       GET  <endpoint>?folio=A-014
+   con un JSON como:
+       { "folio":"A-014", "nombre":"María Fernanda", "apellidos":"García López",
+         "comunidad":"San José Obrero", "decanato":"Toluca Centro", "rol":"Joven" }
+   Si el folio no existe, responde 404.
+   Mientras endpoint esté vacío, la página trabaja en modo demostración
+   con los folios de prueba de abajo.
+   ==================================================================== */
+const REGISTRO = {
+  endpoint: "/api/gafetes",
+  token: "",
 
-
-
-/* Reparte un nombre completo en pila + apellidos cuando no hay diagonal */
-function partirNombre(txt){
-  if(txt.includes("/")){
-    const [a,b] = txt.split("/");
-    return [a.trim(), (b||"").trim()];
+  async buscar(folio){
+    const f = String(folio).trim();
+    if(!f) return null;
+    if(!this.endpoint){
+      await new Promise(r => setTimeout(r, 120));           // simula la espera
+      return DEMO.find(d => simp(d.folio) === simp(f)) || null;
+    }
+    const r = await fetch(this.endpoint + "?folio=" + encodeURIComponent(f), {
+      headers: this.token ? {Authorization: "Bearer " + this.token} : {}
+    });
+    if(r.status === 404) return null;
+    if(!r.ok) throw new Error("el registro respondió " + r.status);
+    return await r.json();
   }
+};
+
+const DEMO = [
+  {folio:"A-014", nombre:"María Fernanda", apellidos:"García López",   comunidad:"San José Obrero",        decanato:"Toluca Centro",  rol:"Joven"},
+  {folio:"A-015", nombre:"Diego",          apellidos:"Hernández Mejía", comunidad:"Sagrado Corazón",       decanato:"Metepec",        rol:"Adolescente"},
+  {folio:"A-016", nombre:"Ana Sofía",      apellidos:"Reyes Vargas",    comunidad:"Santa María de Guadalupe", decanato:"Zinacantepec", rol:"Joven"},
+  {folio:"A-017", nombre:"Emiliano",       apellidos:"Ortiz Nava",      comunidad:"San Juan Bautista",     decanato:"Tenango",        rol:"Adolescente"},
+  {folio:"V-003", nombre:"Regina",         apellidos:"Campos Estrada",  comunidad:"Espíritu Santo",        decanato:"Lerma",          rol:"Voluntario"},
+  {folio:"M-002", nombre:"Santiago",       apellidos:"Peña Bermúdez",   comunidad:"San Pedro Apóstol",     decanato:"Tianguistenco",  rol:"Ministro Ex."},
+  {folio:"S-001", nombre:"Paulina",        apellidos:"Serrano Gómez",   comunidad:"Catedral de San José",  decanato:"Toluca Centro",  rol:"Staff"},
+  {folio:"S-002", nombre:"Iván",           apellidos:"Mondragón Ruiz",  comunidad:"San Buenaventura",      decanato:"Toluca Norte",   rol:"Staff"}
+];
+
+/* ---------- personas cargadas ---------- */
+let PERSONAS = [];
+
+function partirNombre(txt){
+  if(txt.includes("/")){ const [a,b] = txt.split("/"); return [a.trim(), (b||"").trim()]; }
   const p = txt.trim().split(/\s+/);
   if(p.length <= 1) return [txt.trim(), ""];
   if(p.length === 2) return [p[0], p[1]];
@@ -516,23 +588,78 @@ function partirNombre(txt){
   return [p.slice(0,2).join(" "), p.slice(2).join(" ")];
 }
 
-function leerLista(){
-  const crudo = document.getElementById("lista").value.split(/\r?\n/);
-  const gente = [];
-  for(const ln of crudo){
-    if(!ln.trim()) continue;
-    const c = ln.split(/\s*[|\t;]\s*/);
-    const [pila, apellidos] = partirNombre(c[0]||"");
-    gente.push({
-      pila, apellidos,
-      comunidad:(c[1]||"").trim(),
-      decanato:(c[2]||"").trim(),
-      rol:rolDe(c[3]),
-      folio:(c[4]||"").trim()
-    });
-  }
-  return gente;
+/* Acepta los nombres de campo más comunes que puede devolver una API */
+function normalizar(d, folioPedido){
+  const g = (...llaves) => { for(const k of llaves){ if(d[k] != null && String(d[k]).trim()) return String(d[k]).trim(); } return ""; };
+  let pila = g("nombre","nombres","first_name","primer_nombre");
+  let apellidos = g("apellidos","apellido","last_name","surname");
+  if(!apellidos) apellidos = [g("paterno","apellido_paterno"), g("materno","apellido_materno")].filter(Boolean).join(" ");
+  if(!pila){ const completo = g("nombre_completo","nombreCompleto","full_name","participante"); if(completo) [pila, apellidos] = partirNombre(completo); }
+  return {
+    folio: g("folio","id","clave","numero","no") || String(folioPedido||"").trim(),
+    pila, apellidos,
+    comunidad: g("comunidad","parroquia","capilla","iglesia"),
+    decanato:  g("decanato","zona","vicaria"),
+    rol:       rolDe(g("rol","tipo","categoria","grupo"))
+  };
 }
+
+function yaEsta(folio){ return PERSONAS.some(p => simp(p.folio) === simp(folio)); }
+
+function agregar(registro, folioPedido){
+  const p = normalizar(registro, folioPedido);
+  if(!p.pila && !p.apellidos) return false;
+  if(yaEsta(p.folio)) return false;
+  PERSONAS.push(p);
+  return true;
+}
+
+function quitar(folio){
+  PERSONAS = PERSONAS.filter(p => simp(p.folio) !== simp(folio));
+  pintarLista(); generar();
+}
+
+function pintarLista(){
+  const caja = document.getElementById("lista");
+  if(!PERSONAS.length){ caja.className = "lista"; caja.innerHTML = ""; return; }
+  caja.className = "lista hay";
+  caja.innerHTML =
+    `<div class="listaTop"><b>${PERSONAS.length}</b> gafete${PERSONAS.length===1?"":"s"} en la tanda
+       <button type="button" class="ligaBtn" id="limpiar">Quitar todos</button></div>` +
+    PERSONAS.map(p => `
+      <div class="reng">
+        <span class="fol">${esc(p.folio)}</span>
+        <span class="nom">${esc([p.pila,p.apellidos].filter(Boolean).join(" "))}<i>${esc([p.comunidad, p.decanato && ("Decanato de "+p.decanato)].filter(Boolean).join(" · "))}</i></span>
+        <span class="etq" style="background:${p.rol.color};color:${p.rol.txt}">${esc(p.rol.clave)}</span>
+        <button type="button" class="quitar" data-folio="${esc(p.folio)}" aria-label="Quitar ${esc(p.folio)}">&times;</button>
+      </div>`).join("");
+  caja.querySelectorAll(".quitar").forEach(b => b.addEventListener("click", () => quitar(b.dataset.folio)));
+  const l = document.getElementById("limpiar");
+  if(l) l.addEventListener("click", () => { PERSONAS = []; pintarLista(); generar(); aviso("", false); });
+}
+
+/* ---------- búsqueda de un folio ---------- */
+async function buscarFolio(folio){
+  const f = String(folio).trim();
+  if(!f) return;
+  if(yaEsta(f)){ aviso(`El folio ${f} ya está en la tanda.`, true); return; }
+  aviso("Buscando " + f + "…", false);
+  try{
+    const d = await REGISTRO.buscar(f);
+    if(!d){ aviso(`No encontré el folio ${f} en el registro.`, true); return; }
+    if(agregar(d, f)){
+      pintarLista(); generar();
+      const p = PERSONAS[PERSONAS.length-1];
+      aviso(`${p.folio} · ${[p.pila,p.apellidos].filter(Boolean).join(" ")} — ${p.rol.clave}`, false);
+    } else {
+      aviso(`El folio ${f} no trae nombre en el registro.`, true);
+    }
+  }catch(e){
+    aviso("No pude consultar el registro: " + (e.message || e), true);
+  }
+}
+
+function leerLista(){ return PERSONAS; }
 
 function esc(s){return (s||"").replace(/[&<>]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
@@ -569,8 +696,14 @@ function frente(p, folio){
 }
 
 function reverso(p){
+  const partes = ["JAJ XII · Gafete " + (p.folio || "---"),
+                  [p.pila, p.apellidos].filter(Boolean).join(" ") || "(sin nombre)"];
+  const lugar = [p.comunidad, p.decanato && ("Decanato de " + p.decanato)].filter(Boolean).join(" — ");
+  if(lugar) partes.push(lugar);
+  partes.push(p.rol.clave);
+  partes.push(FECHA + " · " + SEDE);
   let codigo = "";
-  try{ codigo = QR.svg(location.origin + "/qr/" + encodeURIComponent(p.folio || "---"), "#12455F"); }catch(e){ codigo = ""; }
+  try{ codigo = QR.svg(partes.join("\n"), "#12455F"); }catch(e){ codigo = ""; }
   return `
   <div class="gafete dorso" style="--rol:${p.rol.color};--rol-txt:${p.rol.txt}">
     <div class="lomo"></div>
@@ -931,27 +1064,51 @@ function partirCSV(texto){
   return filas.filter(r => r.some(c => String(c).trim()));
 }
 
-function filasALista(filas){
-  if(!filas.length) return {texto:"", n:0};
-  let m = {}, datos = filas;
-  if(hayEncabezado(filas[0])){ m = mapearColumnas(filas[0]); datos = filas.slice(1); }
-  else { m = {completo:0, comunidad:1, decanato:2, rol:3, folio:4}; }
-  const g = (r,i) => (i===undefined || r[i]==null) ? "" : String(r[i]).trim();
-  const lineas = datos.map(r=>{
-    let nombre = "";
-    if(m.pila !== undefined){
-      let ap = g(r,m.apellidos);
-      if(!ap) ap = [g(r,m.paterno), g(r,m.materno)].filter(Boolean).join(" ");
-      nombre = ap ? g(r,m.pila) + " / " + ap : g(r,m.pila);
-    } else if(m.completo !== undefined){
-      nombre = g(r,m.completo);
-      const ap = [g(r,m.paterno), g(r,m.materno)].filter(Boolean).join(" ");
-      if(ap) nombre += " / " + ap;
+function foliosDeFilas(filas){
+  if(!filas.length) return [];
+  let col = 0, datos = filas;
+  if(hayEncabezado(filas[0])){
+    const m = mapearColumnas(filas[0]);
+    col = m.folio !== undefined ? m.folio : 0;
+    datos = filas.slice(1);
+  }
+  const vistos = new Set(), out = [];
+  for(const r of datos){
+    let v = r[col] != null ? String(r[col]).trim() : "";
+    if(!v) v = (r.find(c => String(c).trim()) || "").toString().trim();   // por si la columna vino vacía
+    if(!v) continue;
+    const k = simp(v);
+    if(vistos.has(k)) continue;
+    vistos.add(k); out.push(v);
+  }
+  return out;
+}
+
+async function cargarLote(folios, nombreArchivo){
+  const caja = document.getElementById("estadoLote");
+  const faltantes = [], repetidos = [];
+  let hechos = 0, nuevos = 0;
+  const pinta = () => { caja.className = "estado hay"; caja.textContent = `Consultando el registro… ${hechos} de ${folios.length}`; };
+  pinta();
+  for(const f of folios){
+    if(yaEsta(f)){ repetidos.push(f); hechos++; if(hechos % 10 === 0) pinta(); continue; }
+    try{
+      const d = await REGISTRO.buscar(f);
+      if(d && agregar(d, f)) nuevos++; else faltantes.push(f);
+    }catch(e){
+      caja.className = "estado hay err";
+      caja.textContent = "Se interrumpió la consulta: " + (e.message || e) + `. Alcancé a cargar ${nuevos}.`;
+      pintarLista(); generar(); return;
     }
-    if(!nombre.replace("/","").trim()) return null;
-    return [nombre, g(r,m.comunidad), g(r,m.decanato), g(r,m.rol), g(r,m.folio)].join(" | ").replace(/(\s*\|\s*)+$/,"");
-  }).filter(Boolean);
-  return {texto:lineas.join("\n"), n:lineas.length};
+    hechos++;
+    if(hechos % 5 === 0){ pinta(); await new Promise(r => setTimeout(r)); }
+  }
+  pintarLista(); generar();
+  let msg = `${nombreArchivo}: ${nuevos} gafete${nuevos===1?"":"s"} agregado${nuevos===1?"":"s"}`;
+  if(repetidos.length) msg += ` · ${repetidos.length} ya estaban en la tanda`;
+  if(faltantes.length) msg += `. No encontré ${faltantes.length} folio${faltantes.length===1?"":"s"}: ${faltantes.slice(0,12).join(", ")}${faltantes.length>12?"…":""}`;
+  caja.className = "estado hay" + (faltantes.length ? " err" : "");
+  caja.textContent = msg + ".";
 }
 
 function aviso(txt, err){
@@ -960,62 +1117,44 @@ function aviso(txt, err){
   e.className = "estado" + (txt ? " hay" : "") + (err ? " err" : "");
 }
 
-function usarFilas(filas, nombreArchivo){
-  const {texto, n} = filasALista(filas);
-  if(!n){ aviso("No encontré nombres en ese archivo. Revisa que haya una columna Nombre.", true); return; }
-  document.getElementById("lista").value = texto;
-  generar();
-  const raros = new Set();
-  texto.split("\n").forEach(l=>{
-    const r = (l.split("|")[3]||"").trim();
-    if(r && !rolExacto(r)) raros.add(r);
-  });
-  let msg = `${nombreArchivo}: ${n} persona${n===1?"":"s"} cargada${n===1?"":"s"}.`;
-  if(raros.size) msg += ` No reconocí el rol ${[...raros].map(x=>'"'+x+'"').join(", ")} — esos salen como ${ROLES[0].clave}.`;
-  aviso(msg, raros.size>0);
-}
-
 function leerArchivo(file){
   const ext = file.name.split(".").pop().toLowerCase();
-  aviso("Leyendo " + file.name + "…", false);
+  const cajaL = document.getElementById("estadoLote");
+  cajaL.className = "estado hay"; cajaL.textContent = "Leyendo " + file.name + "…";
   if(ext === "csv" || ext === "txt"){
     const fr = new FileReader();
     fr.onload = () => {
       const t = fr.result;
       if(t.indexOf("\uFFFD") >= 0){            // Excel lo guardó en Windows-1252
         const fr2 = new FileReader();
-        fr2.onload = () => usarFilas(partirCSV(fr2.result), file.name);
+        fr2.onload = () => cargarLote(foliosDeFilas(partirCSV(fr2.result)), file.name);
         fr2.readAsText(file, "windows-1252");
         return;
       }
-      usarFilas(partirCSV(t.replace(/^\uFEFF/, "")), file.name);
+      cargarLote(foliosDeFilas(partirCSV(t.replace(/^\uFEFF/, ""))), file.name);
     };
-    fr.onerror = () => aviso("No pude abrir el archivo.", true);
+    fr.onerror = () => { cajaL.className = "estado hay err"; cajaL.textContent = "No pude abrir el archivo."; };
     fr.readAsText(file, "utf-8");
     return;
   }
   if(typeof DecompressionStream === "undefined"){
-    aviso("Tu navegador no puede abrir Excel aquí. Guarda la lista como CSV e inténtalo de nuevo.", true);
+    cajaL.className = "estado hay err"; cajaL.textContent = "Tu navegador no puede abrir Excel aquí. Guarda la lista como CSV e inténtalo de nuevo.";
     return;
   }
   const fr = new FileReader();
   fr.onload = () => {
     leerXlsx(fr.result)
-      .then(filas => usarFilas(filas, file.name))
-      .catch(err => aviso((err && err.message ? err.message : "No pude leer ese Excel") + ". Prueba guardándolo como CSV.", true));
+      .then(filas => cargarLote(foliosDeFilas(filas), file.name))
+      .catch(err => { cajaL.className = "estado hay err"; cajaL.textContent = (err && err.message ? err.message : "No pude leer ese Excel") + ". Prueba guardándolo como CSV."; });
   };
-  fr.onerror = () => aviso("No pude abrir el archivo.", true);
+  fr.onerror = () => { cajaL.className = "estado hay err"; cajaL.textContent = "No pude abrir el archivo."; };
   fr.readAsArrayBuffer(file);
 }
 
 async function descargarPlantilla(){
-  const filas = [
-    ["Folio","Nombre","Apellidos","Comunidad","Decanato","Rol"],
-    ["001","María Fernanda","García López","San José Obrero","Toluca Centro","Joven"],
-    ["002","Diego","Hernández Mejía","Sagrado Corazón","Metepec","Adolescente"]
-  ];
-  const csv = "\uFEFF" + filas.map(f => f.map(c => /[",;\n]/.test(c) ? '"'+c.replace(/"/g,'""')+'"' : c).join(",")).join("\r\n");
-  const nombre = "lista-gafetes-JAJ.csv";
+  const filas = [["Folio"],["A-014"],["A-015"],["V-003"]];
+  const csv = "\uFEFF" + filas.map(f => f.join(",")).join("\r\n");
+  const nombre = "folios-gafetes-JAJ.csv";
   try{
     const dl = window.claude && await window.claude.use("downloads");
     if(dl){ await dl.save({filename:nombre, data:csv}); return; }
@@ -1032,7 +1171,6 @@ async function descargarPlantilla(){
   ROLES.forEach(r=>{
     chips.insertAdjacentHTML("beforeend", `<span class="chip"><span class="pt" style="background:${r.color}"></span>${r.clave}</span>`);
   });
-  document.getElementById("lista").value = EJEMPLO;
   document.getElementById("generar").addEventListener("click", generar);
   document.getElementById("imprimir").addEventListener("click", ()=>{generar(); setTimeout(()=>window.print(), 120);});
   document.getElementById("lockupHdr").src = ART.lockup;
@@ -1054,9 +1192,29 @@ async function descargarPlantilla(){
   drop.addEventListener("drop", e=>{ const f = e.dataTransfer.files[0]; if(f) leerArchivo(f); });
 
   document.getElementById("archivo").addEventListener("change", e=>{ if(e.target.files[0]) leerArchivo(e.target.files[0]); e.target.value=""; });
+
+  const campo = document.getElementById("folioIn");
+  const lanzar = async () => {
+    const v = campo.value.trim();
+    if(!v) return;
+    await buscarFolio(v);
+    campo.value = ""; campo.focus();
+  };
+  document.getElementById("btnBuscar").addEventListener("click", lanzar);
+  campo.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); lanzar(); } });
   document.getElementById("plantillaCsv").addEventListener("click", descargarPlantilla);
-  document.getElementById("ejemplo").addEventListener("click", ()=>{document.getElementById("lista").value = EJEMPLO; generar();});
+  document.getElementById("ejemplo").addEventListener("click", ()=>{
+    PERSONAS = []; DEMO.forEach(d => agregar(d, d.folio));
+    pintarLista(); generar();
+    aviso(REGISTRO.endpoint ? "Ejemplo cargado." : "Ejemplo cargado con los folios de prueba.", false);
+  });
+  if(!REGISTRO.endpoint){
+    document.querySelector(".buscador").insertAdjacentHTML("afterend",
+      '<div class="demo"><span>⚠️</span><span><b>Modo demostración.</b> Todavía no está conectada la base de datos, así que solo funcionan los folios de prueba: A-014 a A-017, V-003, M-002, S-001 y S-002.</span></div>');
+  }
+  pintarLista();
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>{generar();}); } else { generar(); }
+  campo.focus();
 })();
 </script>
 </body>
